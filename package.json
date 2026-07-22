@@ -1,0 +1,25 @@
+{
+  "name": "boxer-von-tabitha",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BastianBinus/boxer-von-tabitha.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BastianBinus/boxer-von-tabitha/issues"
+  },
+  "homepage": "https://github.com/BastianBinus/boxer-von-tabitha#readme",
+  "devDependencies": {
+    "stylelint": "^17.14.1",
+    "stylelint-config-standard": "^40.0.0"
+  }
+}
