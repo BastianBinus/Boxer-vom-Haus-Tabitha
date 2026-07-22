@@ -1,646 +1,775 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-<template id="__bundler_thumbnail" data-bg-color="#f4f5f7">
-  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#f4f5f7"/>
-    <circle cx="380" cy="400" r="140" fill="#bcd6e8"/>
-    <text x="380" y="425" font-family="sans-serif" font-size="120" font-weight="700" fill="#1f2a33" text-anchor="middle">H</text>
-    <rect x="620" y="300" width="360" height="200" rx="16" fill="#ffffff" stroke="#d8dee3" stroke-width="4"/>
-    <rect x="660" y="340" width="280" height="24" rx="6" fill="#1f2a33"/>
-    <rect x="660" y="390" width="200" height="16" rx="6" fill="#9aa5ad"/>
-    <rect x="660" y="440" width="140" height="36" rx="8" fill="#a8cfe0"/>
-  </svg>
-</template>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="./support.js"></script>
+  <template id="__bundler_thumbnail" data-bg-color="#f4f5f7">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="800" fill="#f4f5f7" />
+      <circle cx="380" cy="400" r="140" fill="#bcd6e8" />
+      <text x="380" y="425" font-family="sans-serif" font-size="120" font-weight="700" fill="#1f2a33"
+        text-anchor="middle">H</text>
+      <rect x="620" y="300" width="360" height="200" rx="16" fill="#ffffff" stroke="#d8dee3" stroke-width="4" />
+      <rect x="660" y="340" width="280" height="24" rx="6" fill="#1f2a33" />
+      <rect x="660" y="390" width="200" height="16" rx="6" fill="#9aa5ad" />
+      <rect x="660" y="440" width="140" height="36" rx="8" fill="#a8cfe0" />
+    </svg>
+  </template>
 </head>
+
 <body>
-<x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    body { margin: 0; }
-    ::selection { background: oklch(80% 0.09 220 / 0.35); }
-    input, select, textarea { font-family: Manrope, sans-serif; }
-    input:focus, select:focus, textarea:focus { outline: 2px solid oklch(80% 0.09 220); outline-offset: 1px; }
-  </style>
-</helmet>
+  <x-dc>
+    <helmet>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+      <style>
+        body {
+          margin: 0;
+        }
 
-<div style="{{ sx.page }}">
+        ::selection {
+          background: oklch(80% 0.09 220 / 0.35);
+        }
 
-  <sc-if value="{{ isLoginRoute }}" hint-placeholder-val="{{ false }}">
-    <div style="{{ sx.loginWrap }}">
-      <div style="{{ sx.loginCard }}">
-        <div style="{{ sx.loginKicker }}">Boxer vom Haus Tabitha</div>
-        <div style="{{ sx.loginTitle }}">Zuchtdaten Admin</div>
-        <div style="{{ sx.loginSub }}">Melden Sie sich an, um Hunde, Würfe und Käufer zu verwalten.</div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-          <label style="{{ sx.label }}">E-Mail</label>
-          <input type="email" value="{{ loginEmail }}" onChange="{{ onLoginEmail }}" placeholder="oma@tabitha-boxer.de" style="{{ sx.input }}" />
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <label style="{{ sx.label }}">Passwort</label>
-          <input type="password" value="{{ loginPassword }}" onChange="{{ onLoginPassword }}" placeholder="••••••••" style="{{ sx.input }}" />
-        </div>
-        <button onClick="{{ onLogin }}" style="{{ sx.btnPrimaryFull }}">Anmelden</button>
-      </div>
-    </div>
-  </sc-if>
+        input,
+        select,
+        textarea {
+          font-family: Manrope, sans-serif;
+        }
 
-  <sc-if value="{{ isAppRoute }}" hint-placeholder-val="{{ true }}">
-    <div style="{{ sx.shell }}">
+        input:focus,
+        select:focus,
+        textarea:focus {
+          outline: 2px solid oklch(80% 0.09 220);
+          outline-offset: 1px;
+        }
+      </style>
+    </helmet>
 
-      <sc-if value="{{ showSidebar }}" hint-placeholder-val="{{ true }}">
-        <div style="{{ sx.sidebar }}">
-          <div style="{{ sx.sidebarBrand }}">
-            <div style="{{ sx.sidebarBrandName }}">Haus Tabitha</div>
-            <div style="{{ sx.sidebarBrandKicker }}">Admin</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <button onClick="{{ goDogs }}" style="{{ sx.navItemDogs }}">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V19a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1V9.5"/></svg>
-              <span>Hunde</span>
-            </button>
-            <button onClick="{{ goTrash }}" style="{{ sx.navItemTrash }}">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
-              <span>Papierkorb</span>
-            </button>
-          </div>
-          <div style="{{ sx.sidebarFooter }}">
-            <div style="{{ sx.sidebarUser }}">{{ loginEmail }}</div>
-            <button onClick="{{ onLogout }}" style="{{ sx.logoutLink }}">Abmelden</button>
+    <div style="{{ sx.page }}">
+
+      <sc-if value="{{ isLoginRoute }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ sx.loginWrap }}">
+          <div style="{{ sx.loginCard }}">
+            <div style="{{ sx.loginKicker }}">Boxer vom Haus Tabitha</div>
+            <div style="{{ sx.loginTitle }}">Zuchtdaten Admin</div>
+            <div style="{{ sx.loginSub }}">Melden Sie sich an, um Hunde, Würfe und Käufer zu verwalten.</div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+              <label style="{{ sx.label }}">E-Mail</label>
+              <input type="email" value="{{ loginEmail }}" onChange="{{ onLoginEmail }}"
+                placeholder="gisela.rehkuh@gmail.com" style="{{ sx.input }}" />
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="{{ sx.label }}">Passwort</label>
+              <input type="password" value="{{ loginPassword }}" onChange="{{ onLoginPassword }}" placeholder="••••••••"
+                style="{{ sx.input }}" />
+            </div>
+            <button onClick="{{ onLogin }}" style="{{ sx.btnPrimaryFull }}">Anmelden</button>
           </div>
         </div>
       </sc-if>
 
-      <sc-if value="{{ showMobileTopbar }}" hint-placeholder-val="{{ false }}">
-        <div style="{{ sx.mobileTopbar }}">
-          <div style="{{ sx.mobileTopbarTitle }}">{{ mobileTitle }}</div>
-        </div>
-      </sc-if>
+      <sc-if value="{{ isAppRoute }}" hint-placeholder-val="{{ true }}">
+        <div style="{{ sx.shell }}">
 
-      <div style="{{ sx.main }}">
-        <div style="{{ sx.mainInner }}">
-
-          <sc-if value="{{ isDogsRoute }}" hint-placeholder-val="{{ true }}">
-            <div style="{{ sx.headerRow }}">
-              <div style="{{ sx.h1 }}">Hunde</div>
-              <button onClick="{{ openNewDogForm }}" style="{{ sx.btnPrimary }}">+ Neuer Hund</button>
-            </div>
-
-            <div style="{{ sx.filterRow }}">
-              <input type="text" value="{{ dogSearch }}" onChange="{{ onDogSearch }}" placeholder="Name suchen…" style="{{ sx.searchInput }}" />
-              <div style="display:flex;gap:8px;">
-                <button onClick="{{ setFilterAll }}" style="{{ sx.chipAll }}">Alle</button>
-                <button onClick="{{ setFilterPublished }}" style="{{ sx.chipPublished }}">Veröffentlicht</button>
-                <button onClick="{{ setFilterDraft }}" style="{{ sx.chipDraft }}">Entwurf</button>
+          <sc-if value="{{ showSidebar }}" hint-placeholder-val="{{ true }}">
+            <div style="{{ sx.sidebar }}">
+              <div style="{{ sx.sidebarBrand }}">
+                <div style="{{ sx.sidebarBrandName }}">Haus Tabitha</div>
+                <div style="{{ sx.sidebarBrandKicker }}">Admin</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <button onClick="{{ goDogs }}" style="{{ sx.navItemDogs }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 10.5 12 4l9 6.5" />
+                    <path d="M5 9.5V19a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1V9.5" />
+                  </svg>
+                  <span>Hunde</span>
+                </button>
+                <button onClick="{{ goTrash }}" style="{{ sx.navItemTrash }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 7h16" />
+                    <path d="M9 7V4h6v3" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                  <span>Papierkorb</span>
+                </button>
+              </div>
+              <div style="{{ sx.sidebarFooter }}">
+                <div style="{{ sx.sidebarUser }}">{{ loginEmail }}</div>
+                <button onClick="{{ onLogout }}" style="{{ sx.logoutLink }}">Abmelden</button>
               </div>
             </div>
-
-            <sc-if value="{{ hasVisibleDogs }}" hint-placeholder-val="{{ true }}">
-              <div style="{{ sx.dogGrid }}">
-                <sc-for list="{{ visibleDogs }}" as="dog" hint-placeholder-count="3">
-                  <button onClick="{{ dog.openDetail }}" style="{{ sx.dogCard }}">
-                    <div style="{{ sx.dogCardTopRow }}">
-                      <div style="{{ dog.thumbStyle }}">
-                        <sc-if value="{{ dog.noPhoto }}" hint-placeholder-val="{{ true }}">{{ dog.initial }}</sc-if>
-                      </div>
-                      <div style="{{ sx.dogCardBody }}">
-                        <div style="{{ sx.dogCardName }}">{{ dog.name }}</div>
-                        <div style="{{ sx.dogCardMeta }}">{{ dog.ageLabel }} · {{ dog.genderLabel }}</div>
-                      </div>
-                    </div>
-                    <div style="{{ dog.badgeStyle }}">{{ dog.badgeLabel }}</div>
-                  </button>
-                </sc-for>
-              </div>
-            </sc-if>
-            <sc-if value="{{ hasNoVisibleDogs }}" hint-placeholder-val="{{ false }}">
-              <div style="{{ sx.emptyState }}">
-                <div style="{{ sx.emptyTitle }}">Keine Hunde gefunden</div>
-                <div style="{{ sx.emptyText }}">Passen Sie die Suche an oder legen Sie einen neuen Hund an.</div>
-                <button onClick="{{ openNewDogForm }}" style="{{ sx.btnPrimary }}">+ Neuen Hund anlegen</button>
-              </div>
-            </sc-if>
           </sc-if>
 
-          <sc-if value="{{ isDogDetailRoute }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ goDogs }}" style="{{ sx.backLink }}">← Zurück zu Hunde</button>
-
-            <div style="{{ sx.detailHeader }}">
-              <div style="{{ activeDog.thumbStyleLg }}">
-                <sc-if value="{{ activeDog.noPhoto }}" hint-placeholder-val="{{ true }}">{{ activeDog.initial }}</sc-if>
-              </div>
-              <div style="{{ sx.detailHeaderInfo }}">
-                <div style="{{ sx.detailName }}">{{ activeDog.name }}</div>
-                <div style="{{ sx.dogCardMeta }}">{{ activeDog.ageLabel }} · {{ activeDog.genderLabel }}</div>
-              </div>
-              <div style="{{ activeDog.badgeStyle }}">{{ activeDog.badgeLabel }}</div>
-              <div style="{{ sx.detailActions }}">
-                <button onClick="{{ activeDog.edit }}" style="{{ sx.iconBtn }}" title="Bearbeiten">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20l4.2-.7L19 8.5a2 2 0 0 0 0-2.8l-.7-.7a2 2 0 0 0-2.8 0L4.7 15.8 4 20Z"/></svg>
-                </button>
-                <button onClick="{{ activeDog.remove }}" style="{{ sx.iconBtnDanger }}" title="Löschen">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
-                </button>
-              </div>
+          <sc-if value="{{ showMobileTopbar }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ sx.mobileTopbar }}">
+              <div style="{{ sx.mobileTopbarTitle }}">{{ mobileTitle }}</div>
             </div>
+          </sc-if>
 
-            <div style="{{ sx.tabRow }}">
-              <button onClick="{{ setTabUebersicht }}" style="{{ sx.tabUebersicht }}">Übersicht</button>
-              <button onClick="{{ setTabGesundheit }}" style="{{ sx.tabGesundheit }}">Gesundheit</button>
-              <button onClick="{{ setTabPruefungen }}" style="{{ sx.tabPruefungen }}">Prüfungen</button>
-            </div>
+          <div style="{{ sx.main }}">
+            <div style="{{ sx.mainInner }}">
 
-            <sc-if value="{{ isTabUebersicht }}" hint-placeholder-val="{{ true }}">
-              <div style="{{ sx.factGrid }}">
-                <div style="{{ sx.factCard }}"><div style="{{ sx.factLabel }}">Geburtsdatum</div><div style="{{ sx.factValue }}">{{ activeDog.birthLabel }}</div></div>
-                <div style="{{ sx.factCard }}"><div style="{{ sx.factLabel }}">Geschlecht</div><div style="{{ sx.factValue }}">{{ activeDog.genderLabel }}</div></div>
-                <div style="{{ sx.factCard }}"><div style="{{ sx.factLabel }}">Mutter</div><div style="{{ sx.factValue }}">{{ activeDog.motherLabel }}</div></div>
-                <div style="{{ sx.factCard }}"><div style="{{ sx.factLabel }}">Vater</div><div style="{{ sx.factValue }}">{{ activeDog.fatherLabel }}</div></div>
-              </div>
-
-              <sc-if value="{{ activeDog.isFemale }}" hint-placeholder-val="{{ false }}">
-                <div style="{{ sx.sectionHeaderRow }}">
-                  <div style="{{ sx.h2 }}">Würfe</div>
-                  <button onClick="{{ openNewLitterForm }}" style="{{ sx.btnSecondary }}">+ Neuer Wurf</button>
+              <sc-if value="{{ isDogsRoute }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ sx.headerRow }}">
+                  <div style="{{ sx.h1 }}">Hunde</div>
+                  <button onClick="{{ openNewDogForm }}" style="{{ sx.btnPrimary }}">+ Neuer Hund</button>
                 </div>
-                <sc-if value="{{ activeDog.hasLitters }}" hint-placeholder-val="{{ false }}">
-                  <div style="display:flex;flex-direction:column;gap:16px;">
-                    <sc-for list="{{ activeDog.litters }}" as="litter" hint-placeholder-count="1">
-                      <div style="{{ sx.litterCard }}">
-                        <div style="{{ sx.litterCardHead }}">
-                          <div>
-                            <div style="{{ sx.litterTitle }}">Wurf vom {{ litter.dateLabel }}</div>
-                            <div style="{{ sx.litterMeta }}">Vater: {{ litter.father }} · {{ litter.countLabel }}</div>
+
+                <div style="{{ sx.filterRow }}">
+                  <input type="text" value="{{ dogSearch }}" onChange="{{ onDogSearch }}" placeholder="Name suchen…"
+                    style="{{ sx.searchInput }}" />
+                  <div style="display:flex;gap:8px;">
+                    <button onClick="{{ setFilterAll }}" style="{{ sx.chipAll }}">Alle</button>
+                    <button onClick="{{ setFilterPublished }}" style="{{ sx.chipPublished }}">Veröffentlicht</button>
+                    <button onClick="{{ setFilterDraft }}" style="{{ sx.chipDraft }}">Entwurf</button>
+                  </div>
+                </div>
+
+                <sc-if value="{{ hasVisibleDogs }}" hint-placeholder-val="{{ true }}">
+                  <div style="{{ sx.dogGrid }}">
+                    <sc-for list="{{ visibleDogs }}" as="dog" hint-placeholder-count="3">
+                      <button onClick="{{ dog.openDetail }}" style="{{ sx.dogCard }}">
+                        <div style="{{ sx.dogCardTopRow }}">
+                          <div style="{{ dog.thumbStyle }}">
+                            <sc-if value="{{ dog.noPhoto }}" hint-placeholder-val="{{ true }}">{{ dog.initial }}</sc-if>
                           </div>
-                          <button onClick="{{ litter.remove }}" style="{{ sx.iconBtnDanger }}" title="Wurf löschen">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
+                          <div style="{{ sx.dogCardBody }}">
+                            <div style="{{ sx.dogCardName }}">{{ dog.name }}</div>
+                            <div style="{{ sx.dogCardMeta }}">{{ dog.ageLabel }} · {{ dog.genderLabel }}</div>
+                          </div>
+                        </div>
+                        <div style="{{ dog.badgeStyle }}">{{ dog.badgeLabel }}</div>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ hasNoVisibleDogs }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ sx.emptyState }}">
+                    <div style="{{ sx.emptyTitle }}">Keine Hunde gefunden</div>
+                    <div style="{{ sx.emptyText }}">Passen Sie die Suche an oder legen Sie einen neuen Hund an.</div>
+                    <button onClick="{{ openNewDogForm }}" style="{{ sx.btnPrimary }}">+ Neuen Hund anlegen</button>
+                  </div>
+                </sc-if>
+              </sc-if>
+
+              <sc-if value="{{ isDogDetailRoute }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ goDogs }}" style="{{ sx.backLink }}">← Zurück zu Hunde</button>
+
+                <div style="{{ sx.detailHeader }}">
+                  <div style="{{ activeDog.thumbStyleLg }}">
+                    <sc-if value="{{ activeDog.noPhoto }}" hint-placeholder-val="{{ true }}">{{ activeDog.initial
+                      }}</sc-if>
+                  </div>
+                  <div style="{{ sx.detailHeaderInfo }}">
+                    <div style="{{ sx.detailName }}">{{ activeDog.name }}</div>
+                    <div style="{{ sx.dogCardMeta }}">{{ activeDog.ageLabel }} · {{ activeDog.genderLabel }}</div>
+                  </div>
+                  <div style="{{ activeDog.badgeStyle }}">{{ activeDog.badgeLabel }}</div>
+                  <div style="{{ sx.detailActions }}">
+                    <button onClick="{{ activeDog.edit }}" style="{{ sx.iconBtn }}" title="Bearbeiten">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M4 20l4.2-.7L19 8.5a2 2 0 0 0 0-2.8l-.7-.7a2 2 0 0 0-2.8 0L4.7 15.8 4 20Z" />
+                      </svg>
+                    </button>
+                    <button onClick="{{ activeDog.remove }}" style="{{ sx.iconBtnDanger }}" title="Löschen">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M4 7h16" />
+                        <path d="M9 7V4h6v3" />
+                        <path d="M6 7l1 13h10l1-13" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div style="{{ sx.tabRow }}">
+                  <button onClick="{{ setTabUebersicht }}" style="{{ sx.tabUebersicht }}">Übersicht</button>
+                  <button onClick="{{ setTabGesundheit }}" style="{{ sx.tabGesundheit }}">Gesundheit</button>
+                  <button onClick="{{ setTabPruefungen }}" style="{{ sx.tabPruefungen }}">Prüfungen</button>
+                </div>
+
+                <sc-if value="{{ isTabUebersicht }}" hint-placeholder-val="{{ true }}">
+                  <div style="{{ sx.factGrid }}">
+                    <div style="{{ sx.factCard }}">
+                      <div style="{{ sx.factLabel }}">Geburtsdatum</div>
+                      <div style="{{ sx.factValue }}">{{ activeDog.birthLabel }}</div>
+                    </div>
+                    <div style="{{ sx.factCard }}">
+                      <div style="{{ sx.factLabel }}">Geschlecht</div>
+                      <div style="{{ sx.factValue }}">{{ activeDog.genderLabel }}</div>
+                    </div>
+                    <div style="{{ sx.factCard }}">
+                      <div style="{{ sx.factLabel }}">Mutter</div>
+                      <div style="{{ sx.factValue }}">{{ activeDog.motherLabel }}</div>
+                    </div>
+                    <div style="{{ sx.factCard }}">
+                      <div style="{{ sx.factLabel }}">Vater</div>
+                      <div style="{{ sx.factValue }}">{{ activeDog.fatherLabel }}</div>
+                    </div>
+                  </div>
+
+                  <sc-if value="{{ activeDog.isFemale }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ sx.sectionHeaderRow }}">
+                      <div style="{{ sx.h2 }}">Würfe</div>
+                      <button onClick="{{ openNewLitterForm }}" style="{{ sx.btnSecondary }}">+ Neuer Wurf</button>
+                    </div>
+                    <sc-if value="{{ activeDog.hasLitters }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:16px;">
+                        <sc-for list="{{ activeDog.litters }}" as="litter" hint-placeholder-count="1">
+                          <div style="{{ sx.litterCard }}">
+                            <div style="{{ sx.litterCardHead }}">
+                              <div>
+                                <div style="{{ sx.litterTitle }}">Wurf vom {{ litter.dateLabel }}</div>
+                                <div style="{{ sx.litterMeta }}">Vater: {{ litter.father }} · {{ litter.countLabel }}
+                                </div>
+                              </div>
+                              <button onClick="{{ litter.remove }}" style="{{ sx.iconBtnDanger }}" title="Wurf löschen">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                  stroke-width="1.8">
+                                  <path d="M4 7h16" />
+                                  <path d="M9 7V4h6v3" />
+                                  <path d="M6 7l1 13h10l1-13" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div style="{{ sx.saleListWrap }}">
+                              <div style="{{ sx.saleListLabel }}">Verkäufe</div>
+                              <sc-if value="{{ litter.hasSales }}" hint-placeholder-val="{{ false }}">
+                                <sc-for list="{{ litter.sales }}" as="sale" hint-placeholder-count="1">
+                                  <div style="{{ sx.saleRow }}">
+                                    <div style="{{ sx.saleRowText }}">{{ sale.puppyLabel }} → {{ sale.buyerName }} · {{
+                                      sale.dateLabel }} · {{ sale.priceLabel }}</div>
+                                    <button onClick="{{ sale.remove }}" style="{{ sx.iconBtnDangerSmall }}">
+                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.8">
+                                        <path d="M4 7h16" />
+                                        <path d="M9 7V4h6v3" />
+                                        <path d="M6 7l1 13h10l1-13" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </sc-for>
+                              </sc-if>
+                              <sc-if value="{{ litter.noSales }}" hint-placeholder-val="{{ true }}">
+                                <div style="{{ sx.saleEmptyText }}">Noch keine Verkäufe erfasst.</div>
+                              </sc-if>
+                              <button onClick="{{ litter.openSaleForm }}" style="{{ sx.linkBtn }}">+ Verkauf
+                                erfassen</button>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ activeDog.hasNoLitters }}" hint-placeholder-val="{{ true }}">
+                      <div style="{{ sx.emptyStateSmall }}">Noch keine Würfe erfasst.</div>
+                    </sc-if>
+                  </sc-if>
+                </sc-if>
+
+                <sc-if value="{{ isTabGesundheit }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ sx.sectionHeaderRow }}">
+                    <div style="{{ sx.h2 }}">Gesundheitschecks</div>
+                    <button onClick="{{ toggleHealthForm }}" style="{{ sx.btnSecondary }}">+ Eintrag hinzufügen</button>
+                  </div>
+
+                  <sc-if value="{{ healthFormOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ sx.inlineForm }}">
+                      <div style="{{ sx.inlineFormGrid }}">
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Datum</label>
+                          <input type="date" value="{{ healthDraft.date }}" onChange="{{ onHealthDate }}"
+                            style="{{ sx.input }}" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Art der Untersuchung</label>
+                          <select value="{{ healthDraft.type }}" onChange="{{ onHealthType }}" style="{{ sx.input }}">
+                            <option value="HD/ED-Röntgen">HD/ED-Röntgen</option>
+                            <option value="Herzultraschall">Herzultraschall</option>
+                            <option value="Augenuntersuchung">Augenuntersuchung</option>
+                            <option value="Zahnkontrolle">Zahnkontrolle</option>
+                            <option value="Sonstiges">Sonstiges</option>
+                          </select>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Ergebnis</label>
+                          <input type="text" value="{{ healthDraft.result }}" onChange="{{ onHealthResult }}"
+                            placeholder="z. B. HD-A" style="{{ sx.input }}" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Tierarzt</label>
+                          <input type="text" value="{{ healthDraft.vet }}" onChange="{{ onHealthVet }}"
+                            placeholder="Dr. …" style="{{ sx.input }}" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1;">
+                          <label style="{{ sx.label }}">Notiz</label>
+                          <input type="text" value="{{ healthDraft.note }}" onChange="{{ onHealthNote }}"
+                            placeholder="Optional" style="{{ sx.input }}" />
+                        </div>
+                      </div>
+                      <div style="{{ sx.inlineFormActions }}">
+                        <button onClick="{{ toggleHealthForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
+                        <button onClick="{{ saveHealthEntry }}" style="{{ sx.btnPrimary }}">Speichern</button>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ activeDog.hasHealth }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                      <sc-for list="{{ activeDog.healthChecks }}" as="hc" hint-placeholder-count="1">
+                        <div style="{{ sx.entryRow }}">
+                          <div>
+                            <div style="{{ sx.entryTitle }}">{{ hc.type }} · {{ hc.dateLabel }}</div>
+                            <div style="{{ sx.entryMeta }}">Ergebnis: {{ hc.result }} · {{ hc.vet }}</div>
+                          </div>
+                          <button onClick="{{ hc.remove }}" style="{{ sx.iconBtnDangerSmall }}">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="1.8">
+                              <path d="M4 7h16" />
+                              <path d="M9 7V4h6v3" />
+                              <path d="M6 7l1 13h10l1-13" />
+                            </svg>
                           </button>
                         </div>
-                        <div style="{{ sx.saleListWrap }}">
-                          <div style="{{ sx.saleListLabel }}">Verkäufe</div>
-                          <sc-if value="{{ litter.hasSales }}" hint-placeholder-val="{{ false }}">
-                            <sc-for list="{{ litter.sales }}" as="sale" hint-placeholder-count="1">
-                              <div style="{{ sx.saleRow }}">
-                                <div style="{{ sx.saleRowText }}">{{ sale.puppyLabel }} → {{ sale.buyerName }} · {{ sale.dateLabel }} · {{ sale.priceLabel }}</div>
-                                <button onClick="{{ sale.remove }}" style="{{ sx.iconBtnDangerSmall }}">
-                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
-                                </button>
-                              </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ activeDog.hasNoHealth }}" hint-placeholder-val="{{ true }}">
+                    <div style="{{ sx.emptyStateSmall }}">Noch keine Gesundheitschecks erfasst.</div>
+                  </sc-if>
+                </sc-if>
+
+                <sc-if value="{{ isTabPruefungen }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ sx.sectionHeaderRow }}">
+                    <div style="{{ sx.h2 }}">Prüfungen</div>
+                    <button onClick="{{ toggleExamForm }}" style="{{ sx.btnSecondary }}">+ Eintrag hinzufügen</button>
+                  </div>
+
+                  <sc-if value="{{ examFormOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ sx.inlineForm }}">
+                      <div style="{{ sx.inlineFormGrid }}">
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Datum</label>
+                          <input type="date" value="{{ examDraft.date }}" onChange="{{ onExamDate }}"
+                            style="{{ sx.input }}" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Prüfungsart</label>
+                          <select value="{{ examDraft.type }}" onChange="{{ onExamType }}" style="{{ sx.input }}">
+                            <option value="Zuchttauglichkeitsprüfung">Zuchttauglichkeitsprüfung</option>
+                            <option value="Wesenstest">Wesenstest</option>
+                            <option value="Ausstellung/Zuchtschau">Ausstellung/Zuchtschau</option>
+                            <option value="Sonstiges">Sonstiges</option>
+                          </select>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Ergebnis</label>
+                          <input type="text" value="{{ examDraft.result }}" onChange="{{ onExamResult }}"
+                            placeholder="z. B. bestanden" style="{{ sx.input }}" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <label style="{{ sx.label }}">Ort / Verein</label>
+                          <input type="text" value="{{ examDraft.place }}" onChange="{{ onExamPlace }}"
+                            style="{{ sx.input }}" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1;">
+                          <label style="{{ sx.label }}">Notiz</label>
+                          <input type="text" value="{{ examDraft.note }}" onChange="{{ onExamNote }}"
+                            placeholder="Optional" style="{{ sx.input }}" />
+                        </div>
+                      </div>
+                      <div style="{{ sx.inlineFormActions }}">
+                        <button onClick="{{ toggleExamForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
+                        <button onClick="{{ saveExamEntry }}" style="{{ sx.btnPrimary }}">Speichern</button>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ activeDog.hasExams }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                      <sc-for list="{{ activeDog.exams }}" as="ex" hint-placeholder-count="1">
+                        <div style="{{ sx.entryRow }}">
+                          <div>
+                            <div style="{{ sx.entryTitle }}">{{ ex.type }} · {{ ex.dateLabel }}</div>
+                            <div style="{{ sx.entryMeta }}">Ergebnis: {{ ex.result }} · {{ ex.place }}</div>
+                          </div>
+                          <button onClick="{{ ex.remove }}" style="{{ sx.iconBtnDangerSmall }}">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="1.8">
+                              <path d="M4 7h16" />
+                              <path d="M9 7V4h6v3" />
+                              <path d="M6 7l1 13h10l1-13" />
+                            </svg>
+                          </button>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ activeDog.hasNoExams }}" hint-placeholder-val="{{ true }}">
+                    <div style="{{ sx.emptyStateSmall }}">Noch keine Prüfungen erfasst.</div>
+                  </sc-if>
+                </sc-if>
+              </sc-if>
+
+              <sc-if value="{{ isDogFormRoute }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ cancelDogForm }}" style="{{ sx.backLink }}">← Zurück</button>
+                <div style="{{ sx.h1 }}">{{ dogFormTitle }}</div>
+
+                <div style="{{ sx.formCard }}">
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Name *</label>
+                    <input type="text" value="{{ dogFormDraft.name }}" onChange="{{ onDogName }}"
+                      placeholder="z. B. Bella vom Haus Tabitha" style="{{ sx.input }}" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Geburtsdatum *</label>
+                    <input type="date" value="{{ dogFormDraft.birthDate }}" onChange="{{ onDogBirthDate }}"
+                      style="{{ sx.input }}" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Geschlecht *</label>
+                    <div style="display:flex;gap:8px;">
+                      <button onClick="{{ setGenderF }}" style="{{ sx.genderPillF }}">Hündin</button>
+                      <button onClick="{{ setGenderM }}" style="{{ sx.genderPillM }}">Rüde</button>
+                    </div>
+                  </div>
+
+                  <div style="{{ sx.divider }}"></div>
+
+                  <div style="display:flex;flex-direction:column;gap:10px;">
+                    <label style="{{ sx.label }}">Mutter in Datenbank?</label>
+                    <div style="display:flex;gap:10px;">
+                      <button onClick="{{ setMotherInDbYes }}" style="{{ sx.radioPillYesM }}">Ja</button>
+                      <button onClick="{{ setMotherInDbNo }}" style="{{ sx.radioPillNoM }}">Nein</button>
+                    </div>
+                    <sc-if value="{{ dogFormDraft.motherInDb }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:relative;">
+                        <input type="text" value="{{ dogFormDraft.motherSearch }}" onChange="{{ onMotherSearch }}"
+                          placeholder="Hündin suchen…" style="{{ sx.input }}" />
+                        <sc-if value="{{ hasMotherResults }}" hint-placeholder-val="{{ false }}">
+                          <div style="{{ sx.searchResults }}">
+                            <sc-for list="{{ motherResults }}" as="m" hint-placeholder-count="1">
+                              <button onClick="{{ m.select }}" style="{{ sx.searchResultItem }}">{{ m.name }}</button>
                             </sc-for>
-                          </sc-if>
-                          <sc-if value="{{ litter.noSales }}" hint-placeholder-val="{{ true }}">
-                            <div style="{{ sx.saleEmptyText }}">Noch keine Verkäufe erfasst.</div>
-                          </sc-if>
-                          <button onClick="{{ litter.openSaleForm }}" style="{{ sx.linkBtn }}">+ Verkauf erfassen</button>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ dogFormDraft.motherNotInDb }}" hint-placeholder-val="{{ true }}">
+                      <div style="{{ sx.freetextGrid }}">
+                        <input type="text" value="{{ dogFormDraft.motherName }}" onChange="{{ onMotherName }}"
+                          placeholder="Name der Mutter" style="{{ sx.input }}" />
+                        <input type="text" value="{{ dogFormDraft.motherKennel }}" onChange="{{ onMotherKennel }}"
+                          placeholder="Zwinger" style="{{ sx.input }}" />
+                      </div>
+                    </sc-if>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;gap:10px;">
+                    <label style="{{ sx.label }}">Vater in Datenbank?</label>
+                    <div style="display:flex;gap:10px;">
+                      <button onClick="{{ setFatherInDbYes }}" style="{{ sx.radioPillYesV }}">Ja</button>
+                      <button onClick="{{ setFatherInDbNo }}" style="{{ sx.radioPillNoV }}">Nein</button>
+                    </div>
+                    <sc-if value="{{ dogFormDraft.fatherInDb }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:relative;">
+                        <input type="text" value="{{ dogFormDraft.fatherSearch }}" onChange="{{ onFatherSearch }}"
+                          placeholder="Rüde suchen…" style="{{ sx.input }}" />
+                        <sc-if value="{{ hasFatherResults }}" hint-placeholder-val="{{ false }}">
+                          <div style="{{ sx.searchResults }}">
+                            <sc-for list="{{ fatherResults }}" as="f" hint-placeholder-count="1">
+                              <button onClick="{{ f.select }}" style="{{ sx.searchResultItem }}">{{ f.name }}</button>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ dogFormDraft.fatherNotInDb }}" hint-placeholder-val="{{ true }}">
+                      <div style="{{ sx.freetextGrid }}">
+                        <input type="text" value="{{ dogFormDraft.fatherName }}" onChange="{{ onFatherName }}"
+                          placeholder="Name des Vaters" style="{{ sx.input }}" />
+                        <input type="text" value="{{ dogFormDraft.fatherKennel }}" onChange="{{ onFatherKennel }}"
+                          placeholder="Zwinger" style="{{ sx.input }}" />
+                      </div>
+                    </sc-if>
+                  </div>
+
+                  <div style="{{ sx.divider }}"></div>
+
+                  <div style="{{ sx.publishRow }}">
+                    <button onClick="{{ togglePublished }}" style="{{ sx.checkboxRow }}">
+                      <span style="{{ checkboxBoxStyle }}">
+                        <sc-if value="{{ dogFormDraft.published }}" hint-placeholder-val="{{ false }}">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3">
+                            <path d="M4 12l5 5L20 6" />
+                          </svg>
+                        </sc-if>
+                      </span>
+                      <div style="display:flex;flex-direction:column;gap:2px;">
+                        <div style="{{ sx.publishTitle }}">Veröffentlicht</div>
+                        <div style="{{ sx.publishSub }}">Steuert, ob der Hund auf der öffentlichen Website erscheint.
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  <div style="{{ sx.divider }}"></div>
+
+                  <div style="display:flex;flex-direction:column;gap:10px;">
+                    <label style="{{ sx.label }}">Foto</label>
+                    <sc-if value="{{ photoActive }}" hint-placeholder-val="{{ false }}">
+                      <div style="{{ sx.photoActiveWrap }}">
+                        <sc-if value="{{ dogFormDraft.photo }}" hint-placeholder-val="{{ false }}">
+                          <div style="{{ photoPreviewStyle }}"></div>
+                        </sc-if>
+                        <label style="{{ sx.photoUploadBtn }}">
+                          {{ photoBtnLabel }}
+                          <input type="file" accept="image/*" onChange="{{ onPhotoChange }}" style="display:none;" />
+                        </label>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ photoDisabled }}" hint-placeholder-val="{{ true }}">
+                      <div style="{{ sx.photoDisabledWrap }}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="1.6">
+                          <rect x="3" y="6" width="18" height="14" rx="2" />
+                          <circle cx="12" cy="13" r="3.5" />
+                          <path d="M8 6l1.5-2h5L16 6" />
+                        </svg>
+                        <div style="{{ sx.photoDisabledText }}">Zuerst speichern, dann Foto hochladen.</div>
+                      </div>
+                    </sc-if>
+                  </div>
+
+                  <sc-if value="{{ justSaved }}" hint-placeholder-val="{{ false }}">
+                    <div style="{{ sx.savedBanner }}">
+                      <div>{{ activeFormDog.name }} wurde gespeichert. Sie können jetzt ein Foto hochladen.</div>
+                      <button onClick="{{ finishDogForm }}" style="{{ sx.btnSecondary }}">Fertig, zur
+                        Detailseite</button>
+                    </div>
+                  </sc-if>
+
+                  <div style="{{ sx.formActions }}">
+                    <button onClick="{{ cancelDogForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
+                    <button onClick="{{ saveDogForm }}" style="{{ dogSaveBtnStyle }}"
+                      disabled="{{ dogSaveDisabled }}">Speichern</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isLitterFormRoute }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ cancelLitterForm }}" style="{{ sx.backLink }}">← Zurück</button>
+                <div style="{{ sx.h1 }}">Neuer Wurf</div>
+                <div style="{{ sx.formCard }}">
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Mutter</label>
+                    <input type="text" value="{{ activeDog.name }}" disabled="{{ true }}"
+                      style="{{ sx.inputDisabled }}" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Vater</label>
+                    <input type="text" value="{{ litterDraft.father }}" onChange="{{ onLitterFather }}"
+                      placeholder="Name des Vaters" style="{{ sx.input }}" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Wurfdatum</label>
+                    <input type="date" value="{{ litterDraft.date }}" onChange="{{ onLitterDate }}"
+                      style="{{ sx.input }}" />
+                  </div>
+                  <div style="{{ sx.freetextGrid }}">
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <label style="{{ sx.label }}">Anzahl Rüden</label>
+                      <input type="number" min="0" value="{{ litterDraft.males }}" onChange="{{ onLitterMales }}"
+                        style="{{ sx.input }}" />
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <label style="{{ sx.label }}">Anzahl Hündinnen</label>
+                      <input type="number" min="0" value="{{ litterDraft.females }}" onChange="{{ onLitterFemales }}"
+                        style="{{ sx.input }}" />
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Notiz</label>
+                    <input type="text" value="{{ litterDraft.note }}" onChange="{{ onLitterNote }}"
+                      placeholder="Optional" style="{{ sx.input }}" />
+                  </div>
+                  <div style="{{ sx.formActions }}">
+                    <button onClick="{{ cancelLitterForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
+                    <button onClick="{{ saveLitterForm }}" style="{{ sx.btnPrimary }}">Speichern</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isSaleFormRoute }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ cancelSaleForm }}" style="{{ sx.backLink }}">← Zurück</button>
+                <div style="{{ sx.h1 }}">Verkauf erfassen</div>
+                <div style="{{ sx.formCard }}">
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Welpe</label>
+                    <input type="text" value="{{ saleDraft.puppyLabel }}" onChange="{{ onSalePuppy }}"
+                      placeholder="z. B. Welpe 2 (Rüde, braun)" style="{{ sx.input }}" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Käufer</label>
+                    <select value="{{ saleDraft.buyerId }}" onChange="{{ onSaleBuyer }}" style="{{ sx.input }}">
+                      <option value="">— auswählen —</option>
+                      <sc-for list="{{ buyerOptions }}" as="b" hint-placeholder-count="1">
+                        <option value="{{ b.id }}">{{ b.name }}</option>
+                      </sc-for>
+                    </select>
+                    <button onClick="{{ openBuyerFormFromSale }}" style="{{ sx.linkBtn }}">+ Neuer Käufer
+                      anlegen</button>
+                  </div>
+                  <div style="{{ sx.freetextGrid }}">
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <label style="{{ sx.label }}">Verkaufsdatum</label>
+                      <input type="date" value="{{ saleDraft.date }}" onChange="{{ onSaleDate }}"
+                        style="{{ sx.input }}" />
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <label style="{{ sx.label }}">Preis (CHF)</label>
+                      <input type="number" min="0" value="{{ saleDraft.price }}" onChange="{{ onSalePrice }}"
+                        style="{{ sx.input }}" />
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Notiz</label>
+                    <input type="text" value="{{ saleDraft.note }}" onChange="{{ onSaleNote }}" placeholder="Optional"
+                      style="{{ sx.input }}" />
+                  </div>
+                  <div style="{{ sx.formActions }}">
+                    <button onClick="{{ cancelSaleForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
+                    <button onClick="{{ saveSaleForm }}" style="{{ sx.btnPrimary }}">Speichern</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isBuyerFormRoute }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ cancelBuyerForm }}" style="{{ sx.backLink }}">← Zurück</button>
+                <div style="{{ sx.h1 }}">Neuer Käufer</div>
+                <div style="{{ sx.formCard }}">
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Name</label>
+                    <input type="text" value="{{ buyerDraft.name }}" onChange="{{ onBuyerName }}"
+                      placeholder="z. B. Familie Meier" style="{{ sx.input }}" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Ort</label>
+                    <input type="text" value="{{ buyerDraft.place }}" onChange="{{ onBuyerPlace }}"
+                      style="{{ sx.input }}" />
+                  </div>
+                  <div style="{{ sx.freetextGrid }}">
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <label style="{{ sx.label }}">E-Mail</label>
+                      <input type="email" value="{{ buyerDraft.email }}" onChange="{{ onBuyerEmail }}"
+                        style="{{ sx.input }}" />
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <label style="{{ sx.label }}">Telefon</label>
+                      <input type="text" value="{{ buyerDraft.phone }}" onChange="{{ onBuyerPhone }}"
+                        style="{{ sx.input }}" />
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <label style="{{ sx.label }}">Notiz</label>
+                    <input type="text" value="{{ buyerDraft.note }}" onChange="{{ onBuyerNote }}" placeholder="Optional"
+                      style="{{ sx.input }}" />
+                  </div>
+                  <div style="{{ sx.formActions }}">
+                    <button onClick="{{ cancelBuyerForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
+                    <button onClick="{{ saveBuyerForm }}" style="{{ sx.btnPrimary }}">Speichern</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isTrashRoute }}" hint-placeholder-val="{{ false }}">
+                <div style="{{ sx.h1 }}">Papierkorb</div>
+                <div style="{{ sx.trashSub }}">Gelöschte Einträge werden nach 30 Tagen endgültig entfernt.</div>
+                <div style="{{ sx.tabRow }}">
+                  <button onClick="{{ setTrashTabHunde }}" style="{{ sx.trashTabHunde }}">Hunde</button>
+                  <button onClick="{{ setTrashTabWuerfe }}" style="{{ sx.trashTabWuerfe }}">Würfe</button>
+                  <button onClick="{{ setTrashTabKaeufer }}" style="{{ sx.trashTabKaeufer }}">Käufer</button>
+                  <button onClick="{{ setTrashTabVerkaeufe }}" style="{{ sx.trashTabVerkaeufe }}">Verkäufe</button>
+                </div>
+
+                <sc-if value="{{ hasVisibleTrash }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:10px;">
+                    <sc-for list="{{ visibleTrash }}" as="t" hint-placeholder-count="1">
+                      <div style="{{ sx.trashRow }}">
+                        <div>
+                          <div style="{{ sx.entryTitle }}">{{ t.label }}</div>
+                          <div style="{{ sx.entryMeta }}">Gelöscht am {{ t.deletedLabel }}</div>
+                        </div>
+                        <div style="{{ sx.trashRight }}">
+                          <div style="{{ t.countdownStyle }}">{{ t.daysLeftLabel }}</div>
+                          <button onClick="{{ t.restore }}" style="{{ sx.btnSecondary }}">Wiederherstellen</button>
+                          <button onClick="{{ t.deleteForever }}" style="{{ sx.btnDanger }}">Endgültig löschen</button>
                         </div>
                       </div>
                     </sc-for>
                   </div>
                 </sc-if>
-                <sc-if value="{{ activeDog.hasNoLitters }}" hint-placeholder-val="{{ true }}">
-                  <div style="{{ sx.emptyStateSmall }}">Noch keine Würfe erfasst.</div>
+                <sc-if value="{{ hasNoVisibleTrash }}" hint-placeholder-val="{{ true }}">
+                  <div style="{{ sx.emptyStateSmall }}">Kein Eintrag in diesem Bereich.</div>
                 </sc-if>
               </sc-if>
-            </sc-if>
 
-            <sc-if value="{{ isTabGesundheit }}" hint-placeholder-val="{{ false }}">
-              <div style="{{ sx.sectionHeaderRow }}">
-                <div style="{{ sx.h2 }}">Gesundheitschecks</div>
-                <button onClick="{{ toggleHealthForm }}" style="{{ sx.btnSecondary }}">+ Eintrag hinzufügen</button>
-              </div>
+            </div>
+          </div>
 
-              <sc-if value="{{ healthFormOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="{{ sx.inlineForm }}">
-                  <div style="{{ sx.inlineFormGrid }}">
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Datum</label>
-                      <input type="date" value="{{ healthDraft.date }}" onChange="{{ onHealthDate }}" style="{{ sx.input }}" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Art der Untersuchung</label>
-                      <select value="{{ healthDraft.type }}" onChange="{{ onHealthType }}" style="{{ sx.input }}">
-                        <option value="HD/ED-Röntgen">HD/ED-Röntgen</option>
-                        <option value="Herzultraschall">Herzultraschall</option>
-                        <option value="Augenuntersuchung">Augenuntersuchung</option>
-                        <option value="Zahnkontrolle">Zahnkontrolle</option>
-                        <option value="Sonstiges">Sonstiges</option>
-                      </select>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Ergebnis</label>
-                      <input type="text" value="{{ healthDraft.result }}" onChange="{{ onHealthResult }}" placeholder="z. B. HD-A" style="{{ sx.input }}" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Tierarzt</label>
-                      <input type="text" value="{{ healthDraft.vet }}" onChange="{{ onHealthVet }}" placeholder="Dr. …" style="{{ sx.input }}" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1;">
-                      <label style="{{ sx.label }}">Notiz</label>
-                      <input type="text" value="{{ healthDraft.note }}" onChange="{{ onHealthNote }}" placeholder="Optional" style="{{ sx.input }}" />
-                    </div>
-                  </div>
-                  <div style="{{ sx.inlineFormActions }}">
-                    <button onClick="{{ toggleHealthForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
-                    <button onClick="{{ saveHealthEntry }}" style="{{ sx.btnPrimary }}">Speichern</button>
-                  </div>
-                </div>
-              </sc-if>
-
-              <sc-if value="{{ activeDog.hasHealth }}" hint-placeholder-val="{{ false }}">
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                  <sc-for list="{{ activeDog.healthChecks }}" as="hc" hint-placeholder-count="1">
-                    <div style="{{ sx.entryRow }}">
-                      <div>
-                        <div style="{{ sx.entryTitle }}">{{ hc.type }} · {{ hc.dateLabel }}</div>
-                        <div style="{{ sx.entryMeta }}">Ergebnis: {{ hc.result }} · {{ hc.vet }}</div>
-                      </div>
-                      <button onClick="{{ hc.remove }}" style="{{ sx.iconBtnDangerSmall }}">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
-                      </button>
-                    </div>
-                  </sc-for>
-                </div>
-              </sc-if>
-              <sc-if value="{{ activeDog.hasNoHealth }}" hint-placeholder-val="{{ true }}">
-                <div style="{{ sx.emptyStateSmall }}">Noch keine Gesundheitschecks erfasst.</div>
-              </sc-if>
-            </sc-if>
-
-            <sc-if value="{{ isTabPruefungen }}" hint-placeholder-val="{{ false }}">
-              <div style="{{ sx.sectionHeaderRow }}">
-                <div style="{{ sx.h2 }}">Prüfungen</div>
-                <button onClick="{{ toggleExamForm }}" style="{{ sx.btnSecondary }}">+ Eintrag hinzufügen</button>
-              </div>
-
-              <sc-if value="{{ examFormOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="{{ sx.inlineForm }}">
-                  <div style="{{ sx.inlineFormGrid }}">
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Datum</label>
-                      <input type="date" value="{{ examDraft.date }}" onChange="{{ onExamDate }}" style="{{ sx.input }}" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Prüfungsart</label>
-                      <select value="{{ examDraft.type }}" onChange="{{ onExamType }}" style="{{ sx.input }}">
-                        <option value="Zuchttauglichkeitsprüfung">Zuchttauglichkeitsprüfung</option>
-                        <option value="Wesenstest">Wesenstest</option>
-                        <option value="Ausstellung/Zuchtschau">Ausstellung/Zuchtschau</option>
-                        <option value="Sonstiges">Sonstiges</option>
-                      </select>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Ergebnis</label>
-                      <input type="text" value="{{ examDraft.result }}" onChange="{{ onExamResult }}" placeholder="z. B. bestanden" style="{{ sx.input }}" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <label style="{{ sx.label }}">Ort / Verein</label>
-                      <input type="text" value="{{ examDraft.place }}" onChange="{{ onExamPlace }}" style="{{ sx.input }}" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1;">
-                      <label style="{{ sx.label }}">Notiz</label>
-                      <input type="text" value="{{ examDraft.note }}" onChange="{{ onExamNote }}" placeholder="Optional" style="{{ sx.input }}" />
-                    </div>
-                  </div>
-                  <div style="{{ sx.inlineFormActions }}">
-                    <button onClick="{{ toggleExamForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
-                    <button onClick="{{ saveExamEntry }}" style="{{ sx.btnPrimary }}">Speichern</button>
-                  </div>
-                </div>
-              </sc-if>
-
-              <sc-if value="{{ activeDog.hasExams }}" hint-placeholder-val="{{ false }}">
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                  <sc-for list="{{ activeDog.exams }}" as="ex" hint-placeholder-count="1">
-                    <div style="{{ sx.entryRow }}">
-                      <div>
-                        <div style="{{ sx.entryTitle }}">{{ ex.type }} · {{ ex.dateLabel }}</div>
-                        <div style="{{ sx.entryMeta }}">Ergebnis: {{ ex.result }} · {{ ex.place }}</div>
-                      </div>
-                      <button onClick="{{ ex.remove }}" style="{{ sx.iconBtnDangerSmall }}">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
-                      </button>
-                    </div>
-                  </sc-for>
-                </div>
-              </sc-if>
-              <sc-if value="{{ activeDog.hasNoExams }}" hint-placeholder-val="{{ true }}">
-                <div style="{{ sx.emptyStateSmall }}">Noch keine Prüfungen erfasst.</div>
-              </sc-if>
-            </sc-if>
-          </sc-if>
-
-          <sc-if value="{{ isDogFormRoute }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ cancelDogForm }}" style="{{ sx.backLink }}">← Zurück</button>
-            <div style="{{ sx.h1 }}">{{ dogFormTitle }}</div>
-
-            <div style="{{ sx.formCard }}">
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Name *</label>
-                <input type="text" value="{{ dogFormDraft.name }}" onChange="{{ onDogName }}" placeholder="z. B. Bella vom Haus Tabitha" style="{{ sx.input }}" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Geburtsdatum *</label>
-                <input type="date" value="{{ dogFormDraft.birthDate }}" onChange="{{ onDogBirthDate }}" style="{{ sx.input }}" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Geschlecht *</label>
-                <div style="display:flex;gap:8px;">
-                  <button onClick="{{ setGenderF }}" style="{{ sx.genderPillF }}">Hündin</button>
-                  <button onClick="{{ setGenderM }}" style="{{ sx.genderPillM }}">Rüde</button>
-                </div>
-              </div>
-
-              <div style="{{ sx.divider }}"></div>
-
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <label style="{{ sx.label }}">Mutter in Datenbank?</label>
-                <div style="display:flex;gap:10px;">
-                  <button onClick="{{ setMotherInDbYes }}" style="{{ sx.radioPillYesM }}">Ja</button>
-                  <button onClick="{{ setMotherInDbNo }}" style="{{ sx.radioPillNoM }}">Nein</button>
-                </div>
-                <sc-if value="{{ dogFormDraft.motherInDb }}" hint-placeholder-val="{{ false }}">
-                  <div style="position:relative;">
-                    <input type="text" value="{{ dogFormDraft.motherSearch }}" onChange="{{ onMotherSearch }}" placeholder="Hündin suchen…" style="{{ sx.input }}" />
-                    <sc-if value="{{ hasMotherResults }}" hint-placeholder-val="{{ false }}">
-                      <div style="{{ sx.searchResults }}">
-                        <sc-for list="{{ motherResults }}" as="m" hint-placeholder-count="1">
-                          <button onClick="{{ m.select }}" style="{{ sx.searchResultItem }}">{{ m.name }}</button>
-                        </sc-for>
-                      </div>
-                    </sc-if>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ dogFormDraft.motherNotInDb }}" hint-placeholder-val="{{ true }}">
-                  <div style="{{ sx.freetextGrid }}">
-                    <input type="text" value="{{ dogFormDraft.motherName }}" onChange="{{ onMotherName }}" placeholder="Name der Mutter" style="{{ sx.input }}" />
-                    <input type="text" value="{{ dogFormDraft.motherKennel }}" onChange="{{ onMotherKennel }}" placeholder="Zwinger" style="{{ sx.input }}" />
-                  </div>
-                </sc-if>
-              </div>
-
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <label style="{{ sx.label }}">Vater in Datenbank?</label>
-                <div style="display:flex;gap:10px;">
-                  <button onClick="{{ setFatherInDbYes }}" style="{{ sx.radioPillYesV }}">Ja</button>
-                  <button onClick="{{ setFatherInDbNo }}" style="{{ sx.radioPillNoV }}">Nein</button>
-                </div>
-                <sc-if value="{{ dogFormDraft.fatherInDb }}" hint-placeholder-val="{{ false }}">
-                  <div style="position:relative;">
-                    <input type="text" value="{{ dogFormDraft.fatherSearch }}" onChange="{{ onFatherSearch }}" placeholder="Rüde suchen…" style="{{ sx.input }}" />
-                    <sc-if value="{{ hasFatherResults }}" hint-placeholder-val="{{ false }}">
-                      <div style="{{ sx.searchResults }}">
-                        <sc-for list="{{ fatherResults }}" as="f" hint-placeholder-count="1">
-                          <button onClick="{{ f.select }}" style="{{ sx.searchResultItem }}">{{ f.name }}</button>
-                        </sc-for>
-                      </div>
-                    </sc-if>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ dogFormDraft.fatherNotInDb }}" hint-placeholder-val="{{ true }}">
-                  <div style="{{ sx.freetextGrid }}">
-                    <input type="text" value="{{ dogFormDraft.fatherName }}" onChange="{{ onFatherName }}" placeholder="Name des Vaters" style="{{ sx.input }}" />
-                    <input type="text" value="{{ dogFormDraft.fatherKennel }}" onChange="{{ onFatherKennel }}" placeholder="Zwinger" style="{{ sx.input }}" />
-                  </div>
-                </sc-if>
-              </div>
-
-              <div style="{{ sx.divider }}"></div>
-
-              <div style="{{ sx.publishRow }}">
-                <button onClick="{{ togglePublished }}" style="{{ sx.checkboxRow }}">
-                  <span style="{{ checkboxBoxStyle }}">
-                    <sc-if value="{{ dogFormDraft.published }}" hint-placeholder-val="{{ false }}">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg>
-                    </sc-if>
-                  </span>
-                  <div style="display:flex;flex-direction:column;gap:2px;">
-                    <div style="{{ sx.publishTitle }}">Veröffentlicht</div>
-                    <div style="{{ sx.publishSub }}">Steuert, ob der Hund auf der öffentlichen Website erscheint.</div>
-                  </div>
-                </button>
-              </div>
-
-              <div style="{{ sx.divider }}"></div>
-
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <label style="{{ sx.label }}">Foto</label>
-                <sc-if value="{{ photoActive }}" hint-placeholder-val="{{ false }}">
-                  <div style="{{ sx.photoActiveWrap }}">
-                    <sc-if value="{{ dogFormDraft.photo }}" hint-placeholder-val="{{ false }}">
-                      <div style="{{ photoPreviewStyle }}"></div>
-                    </sc-if>
-                    <label style="{{ sx.photoUploadBtn }}">
-                      {{ photoBtnLabel }}
-                      <input type="file" accept="image/*" onChange="{{ onPhotoChange }}" style="display:none;" />
-                    </label>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ photoDisabled }}" hint-placeholder-val="{{ true }}">
-                  <div style="{{ sx.photoDisabledWrap }}">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>
-                    <div style="{{ sx.photoDisabledText }}">Zuerst speichern, dann Foto hochladen.</div>
-                  </div>
-                </sc-if>
-              </div>
-
-              <sc-if value="{{ justSaved }}" hint-placeholder-val="{{ false }}">
-                <div style="{{ sx.savedBanner }}">
-                  <div>{{ activeFormDog.name }} wurde gespeichert. Sie können jetzt ein Foto hochladen.</div>
-                  <button onClick="{{ finishDogForm }}" style="{{ sx.btnSecondary }}">Fertig, zur Detailseite</button>
-                </div>
-              </sc-if>
-
-              <div style="{{ sx.formActions }}">
-                <button onClick="{{ cancelDogForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
-                <button onClick="{{ saveDogForm }}" style="{{ dogSaveBtnStyle }}" disabled="{{ dogSaveDisabled }}">Speichern</button>
-              </div>
+          <sc-if value="{{ showBottomTabs }}" hint-placeholder-val="{{ false }}">
+            <div style="{{ sx.bottomTabs }}">
+              <button onClick="{{ goDogs }}" style="{{ sx.bottomTabDogs }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M3 10.5 12 4l9 6.5" />
+                  <path d="M5 9.5V19a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1V9.5" />
+                </svg>
+                <span>Hunde</span>
+              </button>
+              <button onClick="{{ goTrash }}" style="{{ sx.bottomTabTrash }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M4 7h16" />
+                  <path d="M9 7V4h6v3" />
+                  <path d="M6 7l1 13h10l1-13" />
+                </svg>
+                <span>Papierkorb</span>
+              </button>
             </div>
           </sc-if>
-
-          <sc-if value="{{ isLitterFormRoute }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ cancelLitterForm }}" style="{{ sx.backLink }}">← Zurück</button>
-            <div style="{{ sx.h1 }}">Neuer Wurf</div>
-            <div style="{{ sx.formCard }}">
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Mutter</label>
-                <input type="text" value="{{ activeDog.name }}" disabled="{{ true }}" style="{{ sx.inputDisabled }}" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Vater</label>
-                <input type="text" value="{{ litterDraft.father }}" onChange="{{ onLitterFather }}" placeholder="Name des Vaters" style="{{ sx.input }}" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Wurfdatum</label>
-                <input type="date" value="{{ litterDraft.date }}" onChange="{{ onLitterDate }}" style="{{ sx.input }}" />
-              </div>
-              <div style="{{ sx.freetextGrid }}">
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <label style="{{ sx.label }}">Anzahl Rüden</label>
-                  <input type="number" min="0" value="{{ litterDraft.males }}" onChange="{{ onLitterMales }}" style="{{ sx.input }}" />
-                </div>
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <label style="{{ sx.label }}">Anzahl Hündinnen</label>
-                  <input type="number" min="0" value="{{ litterDraft.females }}" onChange="{{ onLitterFemales }}" style="{{ sx.input }}" />
-                </div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Notiz</label>
-                <input type="text" value="{{ litterDraft.note }}" onChange="{{ onLitterNote }}" placeholder="Optional" style="{{ sx.input }}" />
-              </div>
-              <div style="{{ sx.formActions }}">
-                <button onClick="{{ cancelLitterForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
-                <button onClick="{{ saveLitterForm }}" style="{{ sx.btnPrimary }}">Speichern</button>
-              </div>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ isSaleFormRoute }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ cancelSaleForm }}" style="{{ sx.backLink }}">← Zurück</button>
-            <div style="{{ sx.h1 }}">Verkauf erfassen</div>
-            <div style="{{ sx.formCard }}">
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Welpe</label>
-                <input type="text" value="{{ saleDraft.puppyLabel }}" onChange="{{ onSalePuppy }}" placeholder="z. B. Welpe 2 (Rüde, braun)" style="{{ sx.input }}" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Käufer</label>
-                <select value="{{ saleDraft.buyerId }}" onChange="{{ onSaleBuyer }}" style="{{ sx.input }}">
-                  <option value="">— auswählen —</option>
-                  <sc-for list="{{ buyerOptions }}" as="b" hint-placeholder-count="1">
-                    <option value="{{ b.id }}">{{ b.name }}</option>
-                  </sc-for>
-                </select>
-                <button onClick="{{ openBuyerFormFromSale }}" style="{{ sx.linkBtn }}">+ Neuer Käufer anlegen</button>
-              </div>
-              <div style="{{ sx.freetextGrid }}">
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <label style="{{ sx.label }}">Verkaufsdatum</label>
-                  <input type="date" value="{{ saleDraft.date }}" onChange="{{ onSaleDate }}" style="{{ sx.input }}" />
-                </div>
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <label style="{{ sx.label }}">Preis (CHF)</label>
-                  <input type="number" min="0" value="{{ saleDraft.price }}" onChange="{{ onSalePrice }}" style="{{ sx.input }}" />
-                </div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Notiz</label>
-                <input type="text" value="{{ saleDraft.note }}" onChange="{{ onSaleNote }}" placeholder="Optional" style="{{ sx.input }}" />
-              </div>
-              <div style="{{ sx.formActions }}">
-                <button onClick="{{ cancelSaleForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
-                <button onClick="{{ saveSaleForm }}" style="{{ sx.btnPrimary }}">Speichern</button>
-              </div>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ isBuyerFormRoute }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ cancelBuyerForm }}" style="{{ sx.backLink }}">← Zurück</button>
-            <div style="{{ sx.h1 }}">Neuer Käufer</div>
-            <div style="{{ sx.formCard }}">
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Name</label>
-                <input type="text" value="{{ buyerDraft.name }}" onChange="{{ onBuyerName }}" placeholder="z. B. Familie Meier" style="{{ sx.input }}" />
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Ort</label>
-                <input type="text" value="{{ buyerDraft.place }}" onChange="{{ onBuyerPlace }}" style="{{ sx.input }}" />
-              </div>
-              <div style="{{ sx.freetextGrid }}">
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <label style="{{ sx.label }}">E-Mail</label>
-                  <input type="email" value="{{ buyerDraft.email }}" onChange="{{ onBuyerEmail }}" style="{{ sx.input }}" />
-                </div>
-                <div style="display:flex;flex-direction:column;gap:6px;">
-                  <label style="{{ sx.label }}">Telefon</label>
-                  <input type="text" value="{{ buyerDraft.phone }}" onChange="{{ onBuyerPhone }}" style="{{ sx.input }}" />
-                </div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <label style="{{ sx.label }}">Notiz</label>
-                <input type="text" value="{{ buyerDraft.note }}" onChange="{{ onBuyerNote }}" placeholder="Optional" style="{{ sx.input }}" />
-              </div>
-              <div style="{{ sx.formActions }}">
-                <button onClick="{{ cancelBuyerForm }}" style="{{ sx.btnGhost }}">Abbrechen</button>
-                <button onClick="{{ saveBuyerForm }}" style="{{ sx.btnPrimary }}">Speichern</button>
-              </div>
-            </div>
-          </sc-if>
-
-          <sc-if value="{{ isTrashRoute }}" hint-placeholder-val="{{ false }}">
-            <div style="{{ sx.h1 }}">Papierkorb</div>
-            <div style="{{ sx.trashSub }}">Gelöschte Einträge werden nach 30 Tagen endgültig entfernt.</div>
-            <div style="{{ sx.tabRow }}">
-              <button onClick="{{ setTrashTabHunde }}" style="{{ sx.trashTabHunde }}">Hunde</button>
-              <button onClick="{{ setTrashTabWuerfe }}" style="{{ sx.trashTabWuerfe }}">Würfe</button>
-              <button onClick="{{ setTrashTabKaeufer }}" style="{{ sx.trashTabKaeufer }}">Käufer</button>
-              <button onClick="{{ setTrashTabVerkaeufe }}" style="{{ sx.trashTabVerkaeufe }}">Verkäufe</button>
-            </div>
-
-            <sc-if value="{{ hasVisibleTrash }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <sc-for list="{{ visibleTrash }}" as="t" hint-placeholder-count="1">
-                  <div style="{{ sx.trashRow }}">
-                    <div>
-                      <div style="{{ sx.entryTitle }}">{{ t.label }}</div>
-                      <div style="{{ sx.entryMeta }}">Gelöscht am {{ t.deletedLabel }}</div>
-                    </div>
-                    <div style="{{ sx.trashRight }}">
-                      <div style="{{ t.countdownStyle }}">{{ t.daysLeftLabel }}</div>
-                      <button onClick="{{ t.restore }}" style="{{ sx.btnSecondary }}">Wiederherstellen</button>
-                      <button onClick="{{ t.deleteForever }}" style="{{ sx.btnDanger }}">Endgültig löschen</button>
-                    </div>
-                  </div>
-                </sc-for>
-              </div>
-            </sc-if>
-            <sc-if value="{{ hasNoVisibleTrash }}" hint-placeholder-val="{{ true }}">
-              <div style="{{ sx.emptyStateSmall }}">Kein Eintrag in diesem Bereich.</div>
-            </sc-if>
-          </sc-if>
-
-        </div>
-      </div>
-
-      <sc-if value="{{ showBottomTabs }}" hint-placeholder-val="{{ false }}">
-        <div style="{{ sx.bottomTabs }}">
-          <button onClick="{{ goDogs }}" style="{{ sx.bottomTabDogs }}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V19a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1V9.5"/></svg>
-            <span>Hunde</span>
-          </button>
-          <button onClick="{{ goTrash }}" style="{{ sx.bottomTabTrash }}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
-            <span>Papierkorb</span>
-          </button>
         </div>
       </sc-if>
-    </div>
-  </sc-if>
 
-  <sc-if value="{{ confirmDeleteOpen }}" hint-placeholder-val="{{ false }}">
-    <div style="{{ sx.modalBackdrop }}">
-      <div style="{{ sx.modalCard }}">
-        <div style="{{ sx.modalIcon }}">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>
+      <sc-if value="{{ confirmDeleteOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ sx.modalBackdrop }}">
+          <div style="{{ sx.modalCard }}">
+            <div style="{{ sx.modalIcon }}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4 7h16" />
+                <path d="M9 7V4h6v3" />
+                <path d="M6 7l1 13h10l1-13" />
+              </svg>
+            </div>
+            <div style="{{ sx.modalTitle }}">{{ confirmDelete.label }} löschen?</div>
+            <div style="{{ sx.modalText }}">{{ confirmDelete.bodyText }}</div>
+            <div style="{{ sx.modalActions }}">
+              <button onClick="{{ closeConfirmDelete }}" style="{{ sx.btnSecondary }}">Abbrechen</button>
+              <button onClick="{{ runConfirmDelete }}" style="{{ sx.btnDanger }}">Löschen</button>
+            </div>
+          </div>
         </div>
-        <div style="{{ sx.modalTitle }}">{{ confirmDelete.label }} löschen?</div>
-        <div style="{{ sx.modalText }}">{{ confirmDelete.bodyText }}</div>
-        <div style="{{ sx.modalActions }}">
-          <button onClick="{{ closeConfirmDelete }}" style="{{ sx.btnSecondary }}">Abbrechen</button>
-          <button onClick="{{ runConfirmDelete }}" style="{{ sx.btnDanger }}">Löschen</button>
-        </div>
-      </div>
+      </sc-if>
+
     </div>
-  </sc-if>
 
-</div>
-
-</x-dc>
-<script type="text/x-dc" data-dc-script>
+  </x-dc>
+  <script type="text/x-dc" data-dc-script>
 const C = {
   bg: 'oklch(97% 0.008 250)', surface: 'oklch(99% 0.004 250)', border: 'oklch(90% 0.01 250)',
   muted: 'oklch(52% 0.02 250)', ink: 'oklch(22% 0.02 250)',
@@ -1248,4 +1377,5 @@ class Component extends DCLogic {
 
 </script>
 </body>
+
 </html>
