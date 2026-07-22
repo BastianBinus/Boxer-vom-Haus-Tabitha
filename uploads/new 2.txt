@@ -1,0 +1,454 @@
+# Boxer von Tabitha — Umsetzungsplan (Website + Supabase-DB + Dashboard)
+
+## Context
+
+The repo (`boxer-von-tabitha`, monorepo, default branch `main`) is currently empty — a single blank `index.html` and nothing else. The user supplied a fully-formed German project spec ("Ultraplan") describing a three-part system for a Boxer-dog breeder: a static marketing/pedigree website, a Supabase (Postgres) database for breeding records, and a React admin dashboard for the breeder, her grandmother ("Oma"), and her aunt ("Tante") to maintain that data without touching raw SQL. The planning phase is done; this document is the refined, execution-ready plan. The user explicitly asked to "ultraplan and refine first" — this plan is the deliverable of that request, not yet an instruction to start coding. Execution happens in a later pass.
+
+Key decisions already made (via clarifying questions):
+- **Repo layout**: monorepo. Website stays at repo root (plain HTML/CSS/JS, matches today's `index.html`). Dashboard lives in `dashboard/` with its own `package.json`, deployed as a separate Vercel project.
+- **Supabase**: a real project will be provisioned and migrations applied live via the Supabase MCP tools when execution happens — not just SQL files left for manual application.
+- **Open spec questions**: resolved using the spec's own suggested defaults — 30-day trash retention, free-text health-check/exam fields (no fixed dropdowns yet), dashboard subdomain `dashboard.boxer-von-tabitha.de`.
+- **Litter sire fallback**: `wuerfe` gets `vater_extern_name`/`vater_extern_zwinger` fields mirroring `hunde`, for studs not in the database.
+- **supabase-js loading**: CDN import via `esm.sh` (`<script type="module">`), not a vendored copy — simpler, accept the one third-party request per page.
+- **Dashboard philosophy**: the dashboard's whole purpose is to make it trivial for a non-technical admin (Oma) to (a) put a dog's data into the database and (b) look it up again — nothing more. It is not a general-purpose data tool; every screen should stay as close to "type it in, see it back" as possible. The data entered is what appears, per dog, on the public site (see below), so buyers can self-serve the info they need without contacting the breeder directly.
+- **Website dog page = tabs**: each dog's public detail page (`hund.html?id=…`) presents its data in tabs (Übersicht, Gesundheit, Prüfungen) rather than one long scroll, so a buyer can jump straight to the section they care about (e.g. just health results).
+- **No visual "Stammbaum" (family tree)**: mutter_id/vater_id and the extern name/kennel fields stay in the schema and are still captured in the dog form and shown as plain text on the Übersicht tab ("Mutter: …", "Vater: …", linked to that dog's page if it's in the database) — but there is no dedicated pedigree tab, tree diagram, or multi-generation visualization. Parent data is just two lines of info on the overview, nothing more.
+- **Photo upload**: `foto_url` is populated automatically via a Supabase Storage bucket + an upload button in the dashboard's dog form — never typed in by hand. See section 2a.
+
+---
+
+## 1. Repo Structure
+
+```
+boxer-von-tabitha/
+├── .gitignore
+├── README.md
+│
+├── index.html                       # Home / news feed
+├── hunde.html                       # Dog overview (live Supabase)
+├── hund.html                        # Dog detail (?id=..., live Supabase)
+├── ueber-mich.html                  # Breeder bio (static placeholder)
+├── kontakt.html                     # Contact form (Formspree)
+├── impressum.html                   # §5 TMG, placeholder identity data
+├── datenschutz.html                 # Privacy policy (drafted now, placeholders only for identity)
+│
+├── partials/
+│   ├── header.html                  # nav + seal badge
+│   ├── footer.html
+│   └── seal-badge.html              # reusable "Zuchtbuch-Stempel" SVG/markup
+│
+├── css/
+│   ├── tokens.css                   # CSS custom properties: colors, type, spacing
+│   ├── fonts.css                    # @font-face declarations (self-hosted)
+│   ├── base.css                     # reset + base typography
+│   └── components.css               # cards, nav, seal badge, forms, footer
+│
+├── js/
+│   ├── config.js                    # SUPABASE_URL / SUPABASE_ANON_KEY constants
+│   ├── supabase-client.js           # createClient() via esm.sh CDN import, wrapper module
+│   ├── partials.js                  # fetch()+inject header/footer/seal fragments
+│   ├── posts.js                     # index.html: load/sort/render posts.json
+│   ├── hunde.js                     # hunde.html: fetch published dogs, render grid
+│   ├── hund.js                      # hund.html: fetch one dog + pedigree/health/exams
+│   ├── tabs.js                      # shared: tab switching for hund.html panels
+│   └── age.js                       # shared: compute age from geburtsdatum
+│
+├── data/
+│   └── posts.json                   # manually edited news items
+│
+├── fonts/
+│   ├── bricolage-grotesque/*.woff2
+│   ├── inter/*.woff2
+│   └── ibm-plex-mono/*.woff2
+│
+├── img/
+│   ├── placeholder-dog.svg
+│   └── og-image.jpg                 # optional, later
+│
+├── .vercelignore                    # excludes "dashboard" from the root static deploy
+│
+├── supabase/
+│   └── migrations/
+│       ├── 0001_init_schema.sql
+│       ├── 0002_rls_policies.sql
+│       ├── 0003_trash_purge_job.sql
+│       └── 0004_storage_bucket.sql
+│
+└── dashboard/
+    ├── package.json
+    ├── vite.config.ts
+    ├── tsconfig.json
+    ├── index.html
+    ├── vercel.json                  # SPA rewrite (all routes -> index.html)
+    ├── .env.example                 # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+    ├── public/
+    └── src/
+        ├── main.tsx
+        ├── App.tsx
+        ├── router.tsx
+        ├── lib/supabaseClient.ts
+        ├── types/database.types.ts   # generated via Supabase MCP (generate_typescript_types)
+        ├── auth/
+        │   ├── AuthProvider.tsx
+        │   ├── LoginPage.tsx
+        │   └── ProtectedRoute.tsx
+        ├── pages/
+        │   ├── DashboardHome.tsx     # redirects to DogsListPage — that IS the home screen
+        │   ├── DogsListPage.tsx      # primary screen: searchable dog list, the dashboard's front door
+        │   ├── DogFormPage.tsx
+        │   ├── DogDetailPage.tsx     # nested health checks + exams
+        │   ├── LittersListPage.tsx
+        │   ├── LitterFormPage.tsx
+        │   ├── BuyersListPage.tsx
+        │   ├── BuyerFormPage.tsx
+        │   ├── SalesListPage.tsx
+        │   ├── SaleFormPage.tsx
+        │   └── TrashPage.tsx
+        ├── components/
+        │   ├── Layout.tsx
+        │   ├── ConfirmDeleteDialog.tsx
+        │   ├── PublishToggle.tsx
+        │   ├── PhotoUpload.tsx       # file picker + preview, uploads to Storage, sets foto_url
+        │   └── forms/…
+        ├── hooks/
+        │   └── useDogs.ts, useHealthChecks.ts, useExams.ts, useLitters.ts, useBuyers.ts, useSales.ts, useTrash.ts
+        └── styles/
+            └── tokens.css            # ported brand tokens for dashboard UI
+```
+
+**Vercel monorepo setup (2 projects, same repo):**
+- Project A (`boxer-von-tabitha-web`): Root Directory `.`, Framework Preset "Other" (no build). `.vercelignore` contains `dashboard` so the static deploy never serves dashboard source.
+- Project B (`boxer-von-tabitha-dashboard`): Root Directory `dashboard`, Framework Preset "Vite". `dashboard/vercel.json` adds an SPA rewrite since React Router needs one.
+
+---
+
+## 2. Supabase Schema, RLS, and Trash Purge
+
+### `supabase/migrations/0001_init_schema.sql`
+
+```sql
+create extension if not exists pgcrypto; -- gen_random_uuid()
+
+create table hunde (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  geburtsdatum date not null,
+  geschlecht text not null,
+  foto_url text,
+  mutter_id uuid references hunde(id) on delete set null,
+  vater_id uuid references hunde(id) on delete set null,
+  mutter_extern_name text,
+  mutter_extern_zwinger text,
+  vater_extern_name text,
+  vater_extern_zwinger text,
+  veroeffentlicht boolean not null default false,
+  deleted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table gesundheitschecks (
+  id uuid primary key default gen_random_uuid(),
+  hund_id uuid not null references hunde(id) on delete cascade,
+  kategorie text not null,   -- free text (HD, ED, Spondylose, Herz, ...)
+  ergebnis text not null,    -- free text
+  datum date not null,
+  deleted_at timestamptz
+);
+
+create table pruefungen (
+  id uuid primary key default gen_random_uuid(),
+  hund_id uuid not null references hunde(id) on delete cascade,
+  art text not null,         -- free text (BH, IPO1, Zuchttauglichkeit, ...)
+  ergebnis text not null,
+  datum date not null,
+  deleted_at timestamptz
+);
+
+create table wuerfe (
+  id uuid primary key default gen_random_uuid(),
+  mutter_id uuid not null references hunde(id) on delete cascade,
+  vater_id uuid references hunde(id) on delete set null,
+  vater_extern_name text,
+  vater_extern_zwinger text,
+  datum date not null,
+  anzahl_welpen integer not null,
+  deleted_at timestamptz
+);
+
+create table kaeufer (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  adresse text,
+  kontakt text,
+  deleted_at timestamptz
+);
+
+create table verkaeufe (
+  id uuid primary key default gen_random_uuid(),
+  welpe_id uuid not null references hunde(id) on delete cascade,
+  kaeufer_id uuid not null references kaeufer(id) on delete cascade,
+  datum date not null,
+  preis numeric,
+  deleted_at timestamptz
+);
+
+create index on hunde (veroeffentlicht) where deleted_at is null;
+create index on gesundheitschecks (hund_id);
+create index on pruefungen (hund_id);
+create index on wuerfe (mutter_id);
+create index on verkaeufe (welpe_id);
+create index on verkaeufe (kaeufer_id);
+```
+
+Notes:
+- `hunde.mutter_id`/`vater_id` use `on delete set null` so the 30-day purge can hard-delete an old dog even if a still-active dog references it as a parent. `wuerfe.vater_id` does the same. Children with no independent meaning (health checks, exams, litters, sales) use `on delete cascade`.
+- `mutter_id` XOR `mutter_extern_*` (and same for father, on both `hunde` and now `wuerfe.vater_*`) is **application-level only**, enforced in the dashboard form logic — not a DB constraint, per the original spec.
+
+### `supabase/migrations/0002_rls_policies.sql`
+
+```sql
+alter table hunde enable row level security;
+alter table gesundheitschecks enable row level security;
+alter table pruefungen enable row level security;
+alter table wuerfe enable row level security;
+alter table kaeufer enable row level security;
+alter table verkaeufe enable row level security;
+
+-- HUNDE: public read only published+non-deleted; authenticated full access
+create policy hunde_public_select on hunde
+  for select to anon, authenticated
+  using (veroeffentlicht = true and deleted_at is null);
+
+create policy hunde_auth_all on hunde
+  for all to authenticated
+  using (true) with check (true);
+
+-- GESUNDHEITSCHECKS: public read only if parent dog is published
+create policy gesundheitschecks_public_select on gesundheitschecks
+  for select to anon, authenticated
+  using (
+    deleted_at is null
+    and exists (
+      select 1 from hunde h
+      where h.id = gesundheitschecks.hund_id
+        and h.veroeffentlicht = true and h.deleted_at is null
+    )
+  );
+create policy gesundheitschecks_auth_all on gesundheitschecks
+  for all to authenticated using (true) with check (true);
+
+-- PRUEFUNGEN: same pattern
+create policy pruefungen_public_select on pruefungen
+  for select to anon, authenticated
+  using (
+    deleted_at is null
+    and exists (
+      select 1 from hunde h
+      where h.id = pruefungen.hund_id
+        and h.veroeffentlicht = true and h.deleted_at is null
+    )
+  );
+create policy pruefungen_auth_all on pruefungen
+  for all to authenticated using (true) with check (true);
+
+-- WUERFE: publicly visible if the dam (mutter_id, required field) is published
+create policy wuerfe_public_select on wuerfe
+  for select to anon, authenticated
+  using (
+    deleted_at is null
+    and exists (
+      select 1 from hunde h
+      where h.id = wuerfe.mutter_id
+        and h.veroeffentlicht = true and h.deleted_at is null
+    )
+  );
+create policy wuerfe_auth_all on wuerfe
+  for all to authenticated using (true) with check (true);
+
+-- KAEUFER / VERKAEUFE: no public policy at all -> RLS default-denies anon entirely
+create policy kaeufer_auth_all on kaeufer
+  for all to authenticated using (true) with check (true);
+create policy verkaeufe_auth_all on verkaeufe
+  for all to authenticated using (true) with check (true);
+```
+
+After applying, verify anon-role privileges explicitly via `get_advisors` and a manual anon-key smoke query — don't assume Supabase's default `public` schema grants are sufficient without checking.
+
+### `supabase/migrations/0003_trash_purge_job.sql`
+
+```sql
+create extension if not exists pg_cron with schema extensions;
+
+create or replace function public.purge_expired_trash()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from verkaeufe        where deleted_at is not null and deleted_at < now() - interval '30 days';
+  delete from gesundheitschecks where deleted_at is not null and deleted_at < now() - interval '30 days';
+  delete from pruefungen       where deleted_at is not null and deleted_at < now() - interval '30 days';
+  delete from wuerfe           where deleted_at is not null and deleted_at < now() - interval '30 days';
+  delete from kaeufer           where deleted_at is not null and deleted_at < now() - interval '30 days';
+  delete from hunde             where deleted_at is not null and deleted_at < now() - interval '30 days';
+end;
+$$;
+
+select cron.schedule('purge-expired-trash', '0 3 * * *', $$select public.purge_expired_trash();$$);
+```
+
+If `pg_cron` scheduling is restricted on the chosen Supabase plan, fall back to a Supabase Edge Function on a Cron Trigger calling the same `purge_expired_trash()` RPC — keep the SQL function either way, only the trigger mechanism changes.
+
+**Dashboard soft-delete pattern**: "delete" is always `UPDATE ... SET deleted_at = now()`, never a real `DELETE`. "Restore" sets `deleted_at = null`. Trash view queries `deleted_at IS NOT NULL`.
+
+---
+
+## 2a. Supabase Storage — Dog Photos
+
+`hunde.foto_url` must never be something Oma types by hand — she has no way to "host an image and get a URL." Instead, a Supabase Storage bucket holds the actual files, and the dashboard uploads to it directly, writing the resulting public URL into `foto_url` automatically.
+
+### `supabase/migrations/0004_storage_bucket.sql`
+
+```sql
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('hundefotos', 'hundefotos', true, 5242880, array['image/jpeg','image/png','image/webp'])
+on conflict (id) do nothing;
+
+-- anyone (including anon website visitors) can read photos — they're shown on the public site
+create policy hundefotos_public_read on storage.objects
+  for select to anon, authenticated
+  using (bucket_id = 'hundefotos');
+
+-- only logged-in dashboard users can upload/replace/delete
+create policy hundefotos_auth_insert on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'hundefotos');
+
+create policy hundefotos_auth_update on storage.objects
+  for update to authenticated
+  using (bucket_id = 'hundefotos')
+  with check (bucket_id = 'hundefotos');
+
+create policy hundefotos_auth_delete on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'hundefotos');
+```
+
+- **Bucket**: `hundefotos`, public (read), 5&nbsp;MB file size cap, JPEG/PNG/WebP only — both enforced server-side by the bucket config, not just client-side validation.
+- **Path convention**: one current photo per dog at a fixed path, e.g. `{{hund_id}}/foto.{{ext}}`, uploaded with `{ upsert: true }`. A new upload always overwrites the same object, so there's never an orphaned-file cleanup problem and `foto_url` never goes stale.
+- **`PhotoUpload.tsx` (dashboard component, used in `DogFormPage`)**: shows the current photo (or a placeholder) with an "Foto hochladen" button over/under it. On file select: client-side check of type/size (fast feedback before the upload even starts), `supabase.storage.from('hundefotos').upload(path, file, { upsert: true, contentType: file.type })`, then `supabase.storage.from('hundefotos').getPublicUrl(path)` to get the URL, which is written into the form's `foto_url` field. No raw URL text input anywhere in the form — upload is the only way `foto_url` gets set.
+- **Website**: no change needed — `hund.js`/`hunde.js` already just render `foto_url` as an `<img src>`; it's now always a Supabase Storage public URL instead of a hand-typed one.
+- **Creation order (new dog vs. existing dog)**: the upload path `{hund_id}/foto.{ext}` requires a `hund_id` that doesn't exist yet for a brand-new dog. Resolved by splitting `DogFormPage` save from photo upload rather than trying to upload before the row exists:
+  1. On a new dog, the form's "Speichern" button is enabled as soon as the required fields (name, geburtsdatum, geschlecht) are filled in — it inserts the `hunde` row immediately (with `veroeffentlicht = false` by default, photo still empty) and gets back a real `id`.
+  2. The `PhotoUpload` widget is disabled with a short hint ("Zuerst speichern, dann Foto hochladen") until that `id` exists. The moment save succeeds, the same page re-renders in "editing an existing dog" state (URL becomes `/hunde/:id/bearbeiten` via a router replace, no page reload) and `PhotoUpload` becomes active immediately, in place — no separate navigation Oma has to hunt for.
+  3. All later edits (including on an existing dog opened from `DogsListPage`) just go through the same form already in that "existing dog" state, so `PhotoUpload` is active from the start.
+  This avoids ever uploading to a temporary/unowned path and renaming after the fact — the row simply exists a moment before the photo does, matching the "type it in, see it back" flow rather than a multi-step wizard.
+
+---
+
+## 3. Supabase MCP Provisioning Sequence (execution time)
+
+1. `list_organizations` — get target org id.
+2. `get_cost` (new project) → `confirm_cost` — surface actual cost to the user before confirming if not free tier.
+3. `create_project` (name `boxer-von-tabitha`, region `eu-central-1` or similar, near Germany).
+4. Poll `get_project` until `ACTIVE_HEALTHY`.
+5. `apply_migration` → `0001_init_schema.sql`.
+6. `apply_migration` → `0002_rls_policies.sql`.
+7. `apply_migration` → `0003_trash_purge_job.sql`.
+8. `apply_migration` → `0004_storage_bucket.sql`.
+9. `list_tables` — verify all 6 tables + columns/FKs match.
+10. `execute_sql` (`select * from cron.job;`) or `list_extensions` — verify `pg_cron` enabled and purge job scheduled.
+11. `execute_sql` (`select id, public, file_size_limit, allowed_mime_types from storage.buckets where id = 'hundefotos';`) — verify the bucket exists with the right config.
+12. `get_advisors` — confirm no missing-RLS warnings; specifically confirm `kaeufer`/`verkaeufe` have zero public-reachable policies, and that `storage.objects` policies for `hundefotos` match section 2a.
+13. `get_project_url` + `get_publishable_keys` — record project URL + anon key for `js/config.js` and `dashboard/.env`.
+14. `generate_typescript_types` → write to `dashboard/src/types/database.types.ts`.
+15. Seed placeholder rows (2–3 published dogs, 1 unpublished, a couple health/exam rows) via `execute_sql`, supporting manual testing before real content exists.
+16. `get_advisors` again after seeding.
+
+`execute_sql` via MCP runs with elevated privileges (bypasses RLS) — not a substitute for testing the anon-key path, which happens in Phase 2 using the real `supabase-js` client from actual pages.
+
+Creating the three real Supabase Auth accounts (owner + Oma + Tante) is **not** part of this sequence — real email addresses must come from the user (see section 7).
+
+---
+
+## 4. Website Implementation Details
+
+- **`data/posts.json`**: array of `{id, title, date, excerpt, body, image}`. `js/posts.js` fetches, sorts descending by `date`, renders into `#posts-feed`. No Supabase dependency — testable standalone.
+- **`js/config.js`**: hardcoded `SUPABASE_URL`/`SUPABASE_ANON_KEY` constants (normal for a static site with no build-time env injection; anon key is safe to expose, RLS is the real gate).
+- **`js/supabase-client.js`**: `import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'` inside `<script type="module">`.
+- **`js/hunde.js`**: `supabase.from('hunde').select('*').eq('veroeffentlicht', true).is('deleted_at', null).order('geburtsdatum', {ascending:false})`. Age computed client-side via `js/age.js`.
+- **`js/hund.js`**: reads `id` from `URLSearchParams`, fetches the single published dog, then in parallel: parent lookups (by `mutter_id`/`vater_id` if set, else render `*_extern_name`/`*_extern_zwinger` text; if a linked parent is unpublished, RLS returns nothing — render gracefully as "nicht verfügbar", not an error), plus `gesundheitschecks`/`pruefungen` filtered by `hund_id` (RLS already restricts these to published dogs, no extra client filtering needed). One level of parent lookup only for v1 — no recursive grandparent tree.
+- **`hund.html` tab layout**: data is grouped into tabs so buyers can jump directly to what they need instead of scrolling a long page — **Übersicht** (name, photo, age computed from `geburtsdatum`, geschlecht, plus "Mutter: …"/"Vater: …" as plain text — linked to that dog's own page if it's `mutter_id`/`vater_id` in-DB, otherwise just the extern name+kennel text; no separate pedigree tab or tree diagram, just two lines of info), **Gesundheit** (`gesundheitschecks` rows: kategorie/ergebnis/datum), **Prüfungen** (`pruefungen` rows: art/ergebnis/datum). Plain CSS/JS tabs (no framework) — a small `js/tabs.js` toggling `aria-selected`/`hidden` on tab panels, URL hash optional (`#gesundheit`) so a tab can be linked directly. All three tabs' data is fetched together in `hund.js` on page load (still one live query round-trip, just rendered into different panels) — switching tabs is instant, no extra network request.
+- **Fonts**: `fonts/{bricolage-grotesque,inter,ibm-plex-mono}/*.woff2` self-hosted, declared in `css/fonts.css` with `font-display: swap`. No Google Fonts CDN reference anywhere.
+- **Design tokens** (`css/tokens.css`):
+  ```css
+  :root {
+    --color-bg: #F1ECE2;
+    --color-accent: #7A2E22;
+    --color-fawn: #C79A6B;
+    --color-ink: #241C15;
+    --font-display: "Bricolage Grotesque", serif;
+    --font-body: "Inter", sans-serif;
+    --font-mono: "IBM Plex Mono", monospace;
+  }
+  ```
+- **Partials system**: `partials.js` fetches `partials/{header,footer,seal-badge}.html` and injects into `<div data-partial="header"></div>`-style placeholders at `DOMContentLoaded`, avoiding copy-pasting nav/seal/footer across 7 pages.
+- **Formspree** (`kontakt.html`): `action="https://formspree.io/f/{{FORMSPREE_FORM_ID}}"`, fields name/email/message, hidden `_subject`, honeypot field for spam. `{{FORMSPREE_FORM_ID}}` stays a literal placeholder until a real Formspree account exists (out of scope, section 7).
+- **`impressum.html`**: full §5 TMG structural layout now, placeholder blocks clearly marked (`<!-- TODO: real name/address per §5 TMG -->`).
+- **`datenschutz.html`**: substantively drafted now — Formspree (US transfer disclosure), Supabase (EU-region hosting, what's fetched client-side, including dog photos served from Supabase Storage), self-hosted fonts (explicit no-Google-Fonts statement), no analytics/tracking currently in place. Only Impressum's identity fields need real data before publishing.
+
+---
+
+## 5. Dashboard App
+
+**Guiding rule**: the dashboard exists for exactly two motions — *put a dog's data in* and *look a dog's data up* — because whatever gets entered here is what buyers see live on that dog's public tabs (section 4). Every screen should be judged against "would Oma know what to do here without asking," not against how much an entity's schema technically supports. No table editor, no bulk actions, no settings screens beyond login.
+
+- **Build tool**: Vite + React + TypeScript (pairs with generated `database.types.ts`). Routing via `react-router-dom`.
+- **Auth**: `createClient(url, anonKey, { auth: { persistSession: true, autoRefreshToken: true } })`. Email+password login (not magic link — magic link fights the "stays logged in, feels like one password" requirement for Oma and Tante). `AuthProvider` context via `supabase.auth.onAuthStateChange`; `ProtectedRoute` redirects unauthenticated users to `/login`. Session persistence relies on `supabase-js` localStorage defaults — note in-app copy warning against Safari Private Browsing on any of their devices. Three real Auth accounts (owner + Oma + Tante), all with identical full access — RLS grants by the generic `authenticated` role, not per-user, so a third account needs no schema/policy changes, just a third row in `auth.users` — created manually post-provisioning (section 7).
+- **Lookup side (primary screen)**: `DogsListPage` is the dashboard's home — a single searchable/filterable list of dogs (by name), each row showing name/photo/age/veröffentlicht-status at a glance. Tapping a dog opens `DogDetailPage`, which mirrors the public site's tab layout (Übersicht/Gesundheit/Prüfungen — no Stammbaum tab, see section 4) so admin and buyer see the same shape of information — what Oma sees when she looks a dog up is recognizably "the same page," just editable. This read path needs no separate list pages for litters/buyers/sales as the everyday entry point; those stay one level deeper, reached from the relevant dog rather than from top-level nav clutter.
+- **Input side (forms)**:
+  - `DogFormPage`: name, `geburtsdatum`, `geschlecht`, radio "Mutter in Datenbank?" switching between searchable `hunde` dropdown (`mutter_id`) vs. two free-text fields (`mutter_extern_name`/`_zwinger`) — mirrored for father, and a `PhotoUpload` widget (section 2a — never a raw `foto_url` text field). `veroeffentlicht` toggle prominent at top, default `false` for new dogs. All fields live on one screen, no multi-step wizard — but for a brand-new dog, `PhotoUpload` starts disabled ("Zuerst speichern, dann Foto hochladen") until the first save gives the row an `id`, per the creation-order flow in section 2a; every other field is editable and saveable from the very first screen.
+  - Adding a health check or exam result happens inline from within `DogDetailPage`'s Gesundheit/Prüfungen tabs — one small "+ Eintrag" form (`kategorie`/`ergebnis`/`datum` or `art`/`ergebnis`/`datum`, free text/date, no dropdowns) that appends to the same list being viewed, rather than a separate page to navigate to and back from.
+  - `LitterFormPage`, `BuyerFormPage`, `SaleFormPage`: same one-screen-per-entity pattern, reached from the relevant dog's page, not from top-level navigation — these are occasional entries, not daily ones, so they shouldn't compete for space with the dog lookup/entry flow.
+- **Trash/Papierkorb UI**: `/papierkorb` route, tab/filter per entity, "Wiederherstellen" action per row, remaining days until purge shown (`deleted_at + 30 days - now()`). Every delete routes through a shared `ConfirmDeleteDialog` ("Wirklich löschen? Der Eintrag landet im Papierkorb und wird nach 30 Tagen endgültig gelöscht.") before issuing the soft-delete update.
+- **Responsive**: sidebar nav collapsing to bottom tab bar/hamburger below ~768px, ≥44px touch targets for iPad, card-based lists (not dense tables), reusing the site's chestnut/stone/fawn tokens for brand consistency.
+
+---
+
+## 6. Build Order / Phasing
+
+**Phase 0 — Static foundations** (no external services): repo scaffolding, design tokens, self-hosted fonts, partials system, all static pages, working `index.html`+`posts.json`+`posts.js`. *Milestone: static site (minus live dog data) visually complete, deployable as a Vercel preview.*
+
+**Phase 1 — Database**: write 4 migrations (schema, RLS, trash purge, storage bucket), provision real Supabase project via MCP (section 3), apply, verify, generate TS types, seed placeholder rows. *Milestone: Supabase project live, schema+RLS+storage verified clean, seed data present.*
+
+**Phase 2 — Website live-data integration**: wire `js/config.js`+`supabase-client.js` to the real project; implement/test `hunde.js`/`hund.js`/`age.js` against seed data; confirm published dogs show, unpublished don't, `kaeufer`/`verkaeufe` unreachable from browser (verify via devtools network tab against the real anon key). *Milestone: public website functionally complete against real Supabase data, placeholder content.*
+
+**Phase 3 — Dashboard app**: Vite+React scaffold, auth flow, all CRUD pages/forms, `veroeffentlicht` toggle, trash/restore UI, confirm-delete dialogs, deploy as its own Vercel project. Requires the three real Auth accounts for end-to-end login testing. *Milestone: owner, Oma, and Tante can all manage data through guided forms; changes reflect on the live site immediately, no rebuild.*
+
+**Phase 4 — Polish & hardening**: re-run `get_advisors` after real usage, accessibility pass (contrast, focus states, labels), swap in real content (photos, bio, final Impressum/Datenschutz review) — content/business task, not code.
+
+---
+
+## 7. Out of Scope for a Coding Agent
+
+- Actual DNS cutover from IONOS to Vercel (registrar access required).
+- Purchasing/connecting the custom domains `boxer-von-tabitha.de` and `dashboard.boxer-von-tabitha.de` in Vercel.
+- Creating the real Formspree account and obtaining the real form endpoint ID.
+- Writing the real Impressum identity data (name, address, contact) — legal responsibility of the site owner.
+- Final human sign-off on `datenschutz.html` content before publishing.
+- Sourcing real dog photos and real breeder bio text.
+- Creating the three real Supabase Auth accounts with real email addresses/passwords for owner + Oma + Tante — the agent can build the mechanism and run the creation call if given real emails explicitly, but must not invent credentials.
+- Any plan/billing tier decisions for Supabase or Vercel beyond free tier (the `confirm_cost` step in section 3 exists to surface this before committing).
+- Deciding the actual vocabulary used inside `gesundheitschecks.kategorie`/`ergebnis` and `pruefungen.art`/`ergebnis` beyond "keep it free text" — breeder's content decision, not implementation.
+
+**What CAN be built now with placeholders**: the entire schema/RLS/purge job against a real provisioned Supabase project; the whole public website with placeholder photos/bio/posts; the whole dashboard app fully functional against real (placeholder-data) Supabase; Formspree wired to a placeholder/test endpoint; Impressum/Datenschutz structurally complete with placeholder blocks only for identity data.
+
+---
+
+## Verification (once execution happens)
+
+- **Website**: open each static page locally (no server needed beyond a plain file server for module scripts, e.g. `npx serve`), confirm posts render/sort, confirm `hunde.html` shows only seeded published dogs, confirm `hund.html?id=<unpublished-id>` shows a "not found" state (RLS-blocked), confirm devtools Network tab shows no request ever returns `kaeufer`/`verkaeufe` rows to the anon key.
+- **Database**: `list_tables` + `get_advisors` clean; manual `select` via anon key (e.g. curl with the anon key against `/rest/v1/kaeufer`) returns empty/403, proving RLS actually blocks it rather than just the UI not asking.
+- **Dashboard**: log in as all three seeded test accounts, create/edit/soft-delete a dog, verify it appears/disappears on the live public site without a rebuild, verify trash shows it with a restore option, verify permanently-expired trash items are gone after simulating the purge function manually (`select public.purge_expired_trash();`).
+- **Photo upload**: upload a photo via `PhotoUpload` in the dashboard, confirm `foto_url` updates and the image renders immediately on `hunde.html`/`hund.html`; re-upload for the same dog and confirm the object is overwritten (same path, no orphan left behind) rather than accumulating; confirm an oversized or non-image file is rejected with a clear message rather than a raw error.
