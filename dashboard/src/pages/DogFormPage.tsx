@@ -1,0 +1,245 @@
+import { useState, useEffect } from 'react'
+import type { FormEvent } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { supabase } from '../lib/supabaseClient'
+import { useDogs, useDog } from '../hooks/useDogs'
+import { PublishToggle } from '../components/PublishToggle'
+import { PhotoUpload } from '../components/PhotoUpload'
+import type { TablesInsert } from '../types/database.types'
+
+type ParentMode = 'db' | 'extern'
+
+export function DogFormPage() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const isEdit = !!id
+  const { dog, loading: dogLoading } = useDog(id)
+  const { create, update } = useDogs()
+
+  const [name, setName] = useState('')
+  const [geburtsdatum, setGeburtsdatum] = useState('')
+  const [geschlecht, setGeschlecht] = useState('Hündin')
+  const [veroeffentlicht, setVeroeffentlicht] = useState(false)
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null)
+
+  const [mutterMode, setMutterMode] = useState<ParentMode>('extern')
+  const [mutterId, setMutterId] = useState('')
+  const [mutterExternName, setMutterExternName] = useState('')
+  const [mutterExternZwinger, setMutterExternZwinger] = useState('')
+
+  const [vaterMode, setVaterMode] = useState<ParentMode>('extern')
+  const [vaterId, setVaterId] = useState('')
+  const [vaterExternName, setVaterExternName] = useState('')
+  const [vaterExternZwinger, setVaterExternZwinger] = useState('')
+
+  const [allDogs, setAllDogs] = useState<Array<{ id: string; name: string }>>([])
+  const [savedId, setSavedId] = useState<string | null>(id ?? null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    supabase.from('hunde').select('id, name').is('deleted_at', null).order('name').then(({ data }) => {
+      setAllDogs(data ?? [])
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!dog) return
+    setName(dog.name)
+    setGeburtsdatum(dog.geburtsdatum)
+    setGeschlecht(dog.geschlecht)
+    setVeroeffentlicht(dog.veroeffentlicht)
+    setFotoUrl(dog.foto_url)
+    setSavedId(dog.id)
+    if (dog.mutter_id) {
+      setMutterMode('db')
+      setMutterId(dog.mutter_id)
+    } else {
+      setMutterMode('extern')
+      setMutterExternName(dog.mutter_extern_name ?? '')
+      setMutterExternZwinger(dog.mutter_extern_zwinger ?? '')
+    }
+    if (dog.vater_id) {
+      setVaterMode('db')
+      setVaterId(dog.vater_id)
+    } else {
+      setVaterMode('extern')
+      setVaterExternName(dog.vater_extern_name ?? '')
+      setVaterExternZwinger(dog.vater_extern_zwinger ?? '')
+    }
+  }, [dog])
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    setError(null)
+    try {
+      const payload: TablesInsert<'hunde'> = {
+        name,
+        geburtsdatum,
+        geschlecht,
+        veroeffentlicht,
+        foto_url: fotoUrl,
+        mutter_id: mutterMode === 'db' ? (mutterId || null) : null,
+        mutter_extern_name: mutterMode === 'extern' ? (mutterExternName || null) : null,
+        mutter_extern_zwinger: mutterMode === 'extern' ? (mutterExternZwinger || null) : null,
+        vater_id: vaterMode === 'db' ? (vaterId || null) : null,
+        vater_extern_name: vaterMode === 'extern' ? (vaterExternName || null) : null,
+        vater_extern_zwinger: vaterMode === 'extern' ? (vaterExternZwinger || null) : null,
+      }
+      if (isEdit && savedId) {
+        await update(savedId, payload)
+      } else {
+        const newDog = await create(payload)
+        setSavedId(newDog.id)
+        navigate(`/hunde/${newDog.id}/bearbeiten`, { replace: true })
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+    }
+    setSaving(false)
+  }
+
+  const otherDogs = allDogs.filter(d => d.id !== savedId)
+
+  if (isEdit && dogLoading) return <div className="empty-state">Wird geladen…</div>
+
+  return (
+    <>
+      <div className="page-header">
+        <h1 className="page-title">{isEdit ? 'Hund bearbeiten' : 'Neuer Hund'}</h1>
+        {savedId && (
+          <Link to={`/hunde/${savedId}`} className="btn btn-ghost btn-sm">
+            Zum Hund →
+          </Link>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit} className="form">
+        <PublishToggle value={veroeffentlicht} onChange={setVeroeffentlicht} />
+
+        {error && <div className="alert alert-error">{error}</div>}
+
+        <div className="form-grid">
+          <div className="field">
+            <label className="field-label" htmlFor="name">Name *</label>
+            <input
+              id="name"
+              className="field-input"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="geburtsdatum">Geburtsdatum *</label>
+            <input
+              id="geburtsdatum"
+              className="field-input"
+              type="date"
+              value={geburtsdatum}
+              onChange={e => setGeburtsdatum(e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="geschlecht">Geschlecht *</label>
+            <select
+              id="geschlecht"
+              className="field-input"
+              value={geschlecht}
+              onChange={e => setGeschlecht(e.target.value)}
+            >
+              <option>Hündin</option>
+              <option>Rüde</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="field">
+          <label className="field-label">Foto</label>
+          <PhotoUpload
+            hundId={savedId}
+            currentUrl={fotoUrl}
+            onUpload={url => setFotoUrl(url)}
+          />
+        </div>
+
+        <fieldset>
+          <legend>Mutter</legend>
+          <div className="radio-group" style={{ marginBottom: 12 }}>
+            <label className="radio-label">
+              <input type="radio" checked={mutterMode === 'db'} onChange={() => setMutterMode('db')} />
+              In Datenbank
+            </label>
+            <label className="radio-label">
+              <input type="radio" checked={mutterMode === 'extern'} onChange={() => setMutterMode('extern')} />
+              Extern
+            </label>
+          </div>
+          {mutterMode === 'db' ? (
+            <select className="field-input" value={mutterId} onChange={e => setMutterId(e.target.value)}>
+              <option value="">— auswählen —</option>
+              {otherDogs.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          ) : (
+            <div className="form-grid">
+              <div className="field">
+                <label className="field-label">Name</label>
+                <input className="field-input" value={mutterExternName} onChange={e => setMutterExternName(e.target.value)} placeholder="z. B. Luna" />
+              </div>
+              <div className="field">
+                <label className="field-label">Zwinger</label>
+                <input className="field-input" value={mutterExternZwinger} onChange={e => setMutterExternZwinger(e.target.value)} placeholder="z. B. vom Bergblick" />
+              </div>
+            </div>
+          )}
+        </fieldset>
+
+        <fieldset>
+          <legend>Vater</legend>
+          <div className="radio-group" style={{ marginBottom: 12 }}>
+            <label className="radio-label">
+              <input type="radio" checked={vaterMode === 'db'} onChange={() => setVaterMode('db')} />
+              In Datenbank
+            </label>
+            <label className="radio-label">
+              <input type="radio" checked={vaterMode === 'extern'} onChange={() => setVaterMode('extern')} />
+              Extern
+            </label>
+          </div>
+          {vaterMode === 'db' ? (
+            <select className="field-input" value={vaterId} onChange={e => setVaterId(e.target.value)}>
+              <option value="">— auswählen —</option>
+              {otherDogs.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          ) : (
+            <div className="form-grid">
+              <div className="field">
+                <label className="field-label">Name</label>
+                <input className="field-input" value={vaterExternName} onChange={e => setVaterExternName(e.target.value)} placeholder="z. B. Rex" />
+              </div>
+              <div className="field">
+                <label className="field-label">Zwinger</label>
+                <input className="field-input" value={vaterExternZwinger} onChange={e => setVaterExternZwinger(e.target.value)} placeholder="z. B. vom Waldrand" />
+              </div>
+            </div>
+          )}
+        </fieldset>
+
+        <div className="form-actions">
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving ? 'Wird gespeichert…' : 'Speichern'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => navigate(savedId ? `/hunde/${savedId}` : '/hunde')}
+          >
+            Abbrechen
+          </button>
+        </div>
+      </form>
+    </>
+  )
+}

@@ -754,7 +754,7 @@ drei echten Auth-Accounts für End-to-End-Login-Tests.
 *Meilenstein: Besitzerin, Oma und Tante können alle Daten über geführte
 Formulare verwalten; Änderungen spiegeln sich sofort auf der Live-Seite,
 kein Rebuild nötig.*
-**Status: ⏳ nächster Schritt.**
+**Status: ✅ erledigt** — `npm run build` sauber (0 TS-Fehler, 102 Module). Alle 10 Seiten, 7 Hooks, 4 geteilte Komponenten, Auth, Router fertig. Branch `feature/phase-3-dashboard`. Drei Supabase-Auth-Konten (Besitzerin, Oma, Tante) noch anzulegen.
 
 **Phase 2 — Website-Live-Daten-Integration** *(nachgezogen)*:
 `js/config.js`+`supabase-client.js` ans echte Projekt anschließen;
