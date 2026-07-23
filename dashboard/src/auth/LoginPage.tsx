@@ -1,20 +1,22 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from './AuthProvider'
 
 export function LoginPage() {
-  const [email, setEmail] = useState('')
+  const { login } = useAuth()
+  const navigate = useNavigate()
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setLoading(true)
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    if (authError) setError(authError.message)
-    setLoading(false)
+    if (login(password)) {
+      navigate('/', { replace: true })
+    } else {
+      setError(true)
+      setPassword('')
+    }
   }
 
   return (
@@ -60,21 +62,7 @@ export function LoginPage() {
             boxShadow: 'var(--shadow-elevated)',
           }}
         >
-          {error && <div className="alert alert-error">{error}</div>}
-
-          <div className="field">
-            <label className="field-label" htmlFor="email">E-Mail</label>
-            <input
-              id="email"
-              className="field-input"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoFocus
-              autoComplete="email"
-            />
-          </div>
+          {error && <div className="alert alert-error">Falsches Passwort.</div>}
 
           <div className="field">
             <label className="field-label" htmlFor="password">Passwort</label>
@@ -83,14 +71,15 @@ export function LoginPage() {
               className="field-input"
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={e => { setPassword(e.target.value); setError(false) }}
               required
+              autoFocus
               autoComplete="current-password"
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Wird angemeldet…' : 'Anmelden'}
+          <button type="submit" className="btn btn-primary">
+            Anmelden
           </button>
         </form>
       </div>

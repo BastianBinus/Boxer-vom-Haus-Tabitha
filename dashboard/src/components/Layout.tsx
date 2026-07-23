@@ -9,7 +9,7 @@ const NAV = [
 ]
 
 export function Layout() {
-  const { signOut } = useAuth()
+  const { logout } = useAuth()
 
   return (
     <div className="shell">
@@ -31,7 +31,7 @@ export function Layout() {
         <div className="sidebar-footer">
           <button
             className="btn btn-ghost btn-sm"
-            onClick={() => void signOut()}
+            onClick={logout}
             style={{ width: '100%' }}
           >
             Abmelden

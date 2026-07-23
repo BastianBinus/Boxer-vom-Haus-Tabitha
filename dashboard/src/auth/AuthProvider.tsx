@@ -1,37 +1,35 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { Session } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabaseClient'
+
+const STORAGE_KEY = 'bvt_auth'
 
 interface AuthContextValue {
-  session: Session | null
-  loading: boolean
-  signOut: () => Promise<void>
+  authed: boolean
+  login: (password: string) => boolean
+  logout: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [authed, setAuthed] = useState(() => localStorage.getItem(STORAGE_KEY) === '1')
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
-      setLoading(false)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s)
-    })
-    return () => subscription.unsubscribe()
-  }, [])
+  const login = (password: string) => {
+    const correct = password === import.meta.env.VITE_ADMIN_PASSWORD
+    if (correct) {
+      localStorage.setItem(STORAGE_KEY, '1')
+      setAuthed(true)
+    }
+    return correct
+  }
 
-  const signOut = async () => {
-    await supabase.auth.signOut()
+  const logout = () => {
+    localStorage.removeItem(STORAGE_KEY)
+    setAuthed(false)
   }
 
   return (
-    <AuthContext.Provider value={{ session, loading, signOut }}>
+    <AuthContext.Provider value={{ authed, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
