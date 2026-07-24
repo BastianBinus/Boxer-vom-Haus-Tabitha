@@ -28,6 +28,7 @@ export function useTrash() {
       { data: kaeufer },
       { data: verkaeufe },
       { data: beitraege },
+      { data: ehemalige },
     ] = await Promise.all([
       supabase.from('hunde').select('id, name, deleted_at').not('deleted_at', 'is', null),
       supabase.from('gesundheitschecks').select('id, kategorie, datum, deleted_at').not('deleted_at', 'is', null),
@@ -36,12 +37,17 @@ export function useTrash() {
       supabase.from('kaeufer').select('id, name, deleted_at').not('deleted_at', 'is', null),
       supabase.from('verkaeufe').select('id, welpe_label, deleted_at').not('deleted_at', 'is', null),
       supabase.from('beitraege').select('id, titel, deleted_at').not('deleted_at', 'is', null),
+      supabase.from('ehemalige').select('id, titel, deleted_at').not('deleted_at', 'is', null),
     ])
 
     setItems({
       beitraege: (beitraege ?? []).map(b => ({
         id: b.id, label: b.titel, deleted_at: b.deleted_at!,
         daysLeft: daysLeft(b.deleted_at!), table: 'beitraege',
+      })),
+      ehemalige: (ehemalige ?? []).map(e => ({
+        id: e.id, label: e.titel, deleted_at: e.deleted_at!,
+        daysLeft: daysLeft(e.deleted_at!), table: 'ehemalige',
       })),
       hunde: (hunde ?? []).map(h => ({
         id: h.id, label: h.name, deleted_at: h.deleted_at!,

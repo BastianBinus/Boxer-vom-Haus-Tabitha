@@ -282,15 +282,55 @@ export type Database = {
           },
         ]
       }
+      ehemalige: {
+        Row: {
+          anzahl_welpen: number | null
+          beschreibung: string | null
+          bilder: Json | null
+          created_at: string
+          datum: string
+          deleted_at: string | null
+          id: string
+          mutter_name: string | null
+          titel: string
+          vater_name: string | null
+          veroeffentlicht: boolean
+        }
+        Insert: {
+          anzahl_welpen?: number | null
+          beschreibung?: string | null
+          bilder?: Json | null
+          created_at?: string
+          datum: string
+          deleted_at?: string | null
+          id?: string
+          mutter_name?: string | null
+          titel: string
+          vater_name?: string | null
+          veroeffentlicht?: boolean
+        }
+        Update: {
+          anzahl_welpen?: number | null
+          beschreibung?: string | null
+          bilder?: Json | null
+          created_at?: string
+          datum?: string
+          deleted_at?: string | null
+          id?: string
+          mutter_name?: string | null
+          titel?: string
+          vater_name?: string | null
+          veroeffentlicht?: boolean
+        }
+        Relationships: []
+      }
       wuerfe: {
         Row: {
           anzahl_huendinnen: number
           anzahl_ruden: number
           datum: string
           deleted_at: string | null
-          galerie_bilder: Json | null
           id: string
-          in_galerie: boolean
           mutter_id: string
           notiz: string | null
           vater_extern_name: string | null
@@ -302,9 +342,7 @@ export type Database = {
           anzahl_ruden?: number
           datum: string
           deleted_at?: string | null
-          galerie_bilder?: Json | null
           id?: string
-          in_galerie?: boolean
           mutter_id: string
           notiz?: string | null
           vater_extern_name?: string | null
@@ -316,9 +354,7 @@ export type Database = {
           anzahl_ruden?: number
           datum?: string
           deleted_at?: string | null
-          galerie_bilder?: Json | null
           id?: string
-          in_galerie?: boolean
           mutter_id?: string
           notiz?: string | null
           vater_extern_name?: string | null

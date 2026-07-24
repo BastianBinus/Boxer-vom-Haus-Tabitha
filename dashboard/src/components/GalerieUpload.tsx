@@ -2,18 +2,19 @@ import { useRef, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 interface Props {
-  wurfId: string | null
+  bucket: string
+  entityId: string | null
   bilder: string[]
   onChange: (bilder: string[]) => void
 }
 
-export function GalerieUpload({ wurfId, bilder, onChange }: Props) {
+export function GalerieUpload({ bucket, entityId, bilder, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleFiles = async (files: FileList) => {
-    if (!wurfId) return
+    if (!entityId) return
     setError(null)
     setUploading(true)
     const newUrls: string[] = []
@@ -27,12 +28,12 @@ export function GalerieUpload({ wurfId, bilder, onChange }: Props) {
         continue
       }
       const ext = file.name.split('.').pop() ?? 'jpg'
-      const path = `${wurfId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const path = `${entityId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: upErr } = await supabase.storage
-        .from('wurf-fotos')
+        .from(bucket)
         .upload(path, file, { upsert: false })
       if (upErr) { setError(upErr.message); continue }
-      const { data } = supabase.storage.from('wurf-fotos').getPublicUrl(path)
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path)
       newUrls.push(data.publicUrl)
     }
     if (newUrls.length > 0) onChange([...bilder, ...newUrls])
@@ -78,12 +79,12 @@ export function GalerieUpload({ wurfId, bilder, onChange }: Props) {
         <button
           type="button"
           className="btn btn-ghost btn-sm"
-          disabled={!wurfId || uploading}
+          disabled={!entityId || uploading}
           onClick={() => inputRef.current?.click()}
         >
           {uploading ? 'Wird hochgeladen…' : '+ Fotos hinzufügen'}
         </button>
-        {!wurfId && <span className="field-hint">Zuerst speichern, dann Fotos hochladen.</span>}
+        {!entityId && <span className="field-hint">Zuerst speichern, dann Fotos hochladen.</span>}
         {error && <span className="field-hint" style={{ color: 'var(--color-cat-blush-text)' }}>{error}</span>}
       </div>
 

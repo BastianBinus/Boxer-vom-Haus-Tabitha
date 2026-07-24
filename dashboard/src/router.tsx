@@ -15,6 +15,8 @@ import { SaleFormPage } from './pages/SaleFormPage'
 import { TrashPage } from './pages/TrashPage'
 import { PostsListPage } from './pages/PostsListPage'
 import { PostFormPage } from './pages/PostFormPage'
+import { EhemaligeListPage } from './pages/EhemaligeListPage'
+import { EhemaligeFormPage } from './pages/EhemaligeFormPage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -42,6 +44,9 @@ export const router = createBrowserRouter([
       { path: 'beitraege', element: <PostsListPage /> },
       { path: 'beitraege/neu', element: <PostFormPage /> },
       { path: 'beitraege/:id/bearbeiten', element: <PostFormPage /> },
+      { path: 'ehemalige', element: <EhemaligeListPage /> },
+      { path: 'ehemalige/neu', element: <EhemaligeFormPage /> },
+      { path: 'ehemalige/:id/bearbeiten', element: <EhemaligeFormPage /> },
       { path: 'papierkorb', element: <TrashPage /> },
     ],
   },

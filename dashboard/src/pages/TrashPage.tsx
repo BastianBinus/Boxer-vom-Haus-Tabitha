@@ -3,10 +3,11 @@ import { useTrash } from '../hooks/useTrash'
 import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog'
 import type { TrashItem } from '../hooks/useTrash'
 
-type TabKey = 'beitraege' | 'hunde' | 'gesundheitschecks' | 'pruefungen' | 'wuerfe' | 'kaeufer' | 'verkaeufe'
+type TabKey = 'beitraege' | 'ehemalige' | 'hunde' | 'gesundheitschecks' | 'pruefungen' | 'wuerfe' | 'kaeufer' | 'verkaeufe'
 
 const TABS: Array<{ key: TabKey; label: string }> = [
   { key: 'beitraege', label: 'Beiträge' },
+  { key: 'ehemalige', label: 'Ehemalige' },
   { key: 'hunde', label: 'Hunde' },
   { key: 'gesundheitschecks', label: 'Gesundheit' },
   { key: 'pruefungen', label: 'Prüfungen' },
