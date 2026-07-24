@@ -13,6 +13,8 @@ import { BuyerFormPage } from './pages/BuyerFormPage'
 import { SalesListPage } from './pages/SalesListPage'
 import { SaleFormPage } from './pages/SaleFormPage'
 import { TrashPage } from './pages/TrashPage'
+import { PostsListPage } from './pages/PostsListPage'
+import { PostFormPage } from './pages/PostFormPage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -37,6 +39,9 @@ export const router = createBrowserRouter([
       { path: 'kaeufer/:id/bearbeiten', element: <BuyerFormPage /> },
       { path: 'verkaeufe/neu', element: <SaleFormPage /> },
       { path: 'verkaeufe/:id/bearbeiten', element: <SaleFormPage /> },
+      { path: 'beitraege', element: <PostsListPage /> },
+      { path: 'beitraege/neu', element: <PostFormPage /> },
+      { path: 'beitraege/:id/bearbeiten', element: <PostFormPage /> },
       { path: 'papierkorb', element: <TrashPage /> },
     ],
   },

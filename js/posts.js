@@ -1,8 +1,23 @@
+import { supabase } from './supabase-client.js'
 import { loadPartials } from './partials.js'
 
 async function loadPosts() {
-  const res = await fetch('/data/posts.json')
-  return res.json()
+  const { data, error } = await supabase
+    .from('beitraege')
+    .select('id, titel, datum, auszug, inhalt, video_url, images')
+    .eq('veroeffentlicht', true)
+    .is('deleted_at', null)
+    .order('datum', { ascending: false })
+  if (error) throw error
+  return data.map(p => ({
+    id: p.id,
+    title: p.titel,
+    date: p.datum,
+    excerpt: p.auszug,
+    body: p.inhalt,
+    video_url: p.video_url,
+    images: p.images,
+  }))
 }
 
 function getEmbedUrl(url) {
@@ -49,7 +64,7 @@ function renderPost(post) {
     <article class="card card-elevated post-card">
       <time class="post-date">${new Date(post.date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</time>
       <h2 class="post-title">${post.title}</h2>
-      <p class="post-excerpt">${post.excerpt}</p>
+      ${post.excerpt ? `<p class="post-excerpt">${post.excerpt}</p>` : ''}
       ${mediaParts.join('')}
     </article>
   `
@@ -62,8 +77,9 @@ async function init() {
 
   try {
     const posts = await loadPosts()
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date))
-    feed.innerHTML = posts.map(renderPost).join('')
+    feed.innerHTML = posts.length
+      ? posts.map(renderPost).join('')
+      : '<p class="empty-text">Noch keine Beiträge vorhanden.</p>'
   } catch {
     feed.innerHTML = '<p class="error-text">Beiträge konnten nicht geladen werden.</p>'
   }
