@@ -288,7 +288,9 @@ export type Database = {
           anzahl_ruden: number
           datum: string
           deleted_at: string | null
+          galerie_bilder: Json | null
           id: string
+          in_galerie: boolean
           mutter_id: string
           notiz: string | null
           vater_extern_name: string | null
@@ -300,7 +302,9 @@ export type Database = {
           anzahl_ruden?: number
           datum: string
           deleted_at?: string | null
+          galerie_bilder?: Json | null
           id?: string
+          in_galerie?: boolean
           mutter_id: string
           notiz?: string | null
           vater_extern_name?: string | null
@@ -312,7 +316,9 @@ export type Database = {
           anzahl_ruden?: number
           datum?: string
           deleted_at?: string | null
+          galerie_bilder?: Json | null
           id?: string
+          in_galerie?: boolean
           mutter_id?: string
           notiz?: string | null
           vater_extern_name?: string | null

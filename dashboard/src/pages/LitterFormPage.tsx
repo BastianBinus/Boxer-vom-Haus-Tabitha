@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLitters, useLitter } from '../hooks/useLitters'
 import { useDogs } from '../hooks/useDogs'
+import { GalerieUpload } from '../components/GalerieUpload'
 import type { TablesInsert } from '../types/database.types'
 
 type VaterMode = 'db' | 'extern'
@@ -15,6 +16,7 @@ export function LitterFormPage() {
   const { create, update } = useLitters()
   const { dogs } = useDogs()
 
+  const [savedId, setSavedId] = useState<string | null>(id ?? null)
   const [mutterId, setMutterId] = useState('')
   const [datum, setDatum] = useState('')
   const [anzahlRuden, setAnzahlRuden] = useState(0)
@@ -24,6 +26,8 @@ export function LitterFormPage() {
   const [vaterExternName, setVaterExternName] = useState('')
   const [vaterExternZwinger, setVaterExternZwinger] = useState('')
   const [notiz, setNotiz] = useState('')
+  const [inGalerie, setInGalerie] = useState(false)
+  const [galerieBilder, setGalerieBilder] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -34,6 +38,8 @@ export function LitterFormPage() {
     setAnzahlRuden(litter.anzahl_ruden)
     setAnzahlHuendinnen(litter.anzahl_huendinnen)
     setNotiz(litter.notiz ?? '')
+    setInGalerie(litter.in_galerie)
+    setGalerieBilder(Array.isArray(litter.galerie_bilder) ? (litter.galerie_bilder as string[]) : [])
     if (litter.vater_id) {
       setVaterMode('db')
       setVaterId(litter.vater_id)
@@ -61,10 +67,17 @@ export function LitterFormPage() {
         vater_id: vaterMode === 'db' ? (vaterId || null) : null,
         vater_extern_name: vaterMode === 'extern' ? (vaterExternName || null) : null,
         vater_extern_zwinger: vaterMode === 'extern' ? (vaterExternZwinger || null) : null,
+        in_galerie: inGalerie,
+        galerie_bilder: galerieBilder.length > 0 ? galerieBilder : null,
       }
-      if (isEdit && id) await update(id, payload)
-      else await create(payload)
-      navigate('/wuerfe')
+      if (isEdit && id) {
+        await update(id, payload)
+        navigate('/wuerfe')
+      } else {
+        const data = await create(payload)
+        setSavedId(data.id)
+        navigate(`/wuerfe/${data.id}/bearbeiten`)
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
     }
@@ -138,6 +151,26 @@ export function LitterFormPage() {
         <div className="field">
           <label className="field-label">Notiz</label>
           <textarea className="field-input field-textarea" value={notiz} onChange={e => setNotiz(e.target.value)} />
+        </div>
+
+        <div className="field">
+          <label className="radio-label" style={{ gap: 10 }}>
+            <input
+              type="checkbox"
+              checked={inGalerie}
+              onChange={e => setInGalerie(e.target.checked)}
+            />
+            <span style={{ fontWeight: 600, fontSize: 14 }}>In Ehemaligengalerie anzeigen</span>
+          </label>
+        </div>
+
+        <div className="field">
+          <label className="field-label">Galeriebilder</label>
+          <GalerieUpload
+            wurfId={savedId}
+            bilder={galerieBilder}
+            onChange={setGalerieBilder}
+          />
         </div>
 
         <div className="form-actions">

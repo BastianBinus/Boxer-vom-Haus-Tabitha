@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ehemaligengalerie — Boxer vom Hause Tabitha</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <div data-partial="header"></div>
+
+  <main class="page-main">
+    <div class="page-inner">
+      <h1 class="page-title">Ehemaligengalerie</h1>
+      <div id="galerie-grid" class="galerie-grid"></div>
+      <p id="galerie-empty" class="muted" hidden>Noch keine Würfe in der Galerie.</p>
+    </div>
+  </main>
+
+  <div data-partial="footer"></div>
+
+  <div id="galerie-modal" class="galerie-modal" hidden aria-modal="true" role="dialog">
+    <div class="galerie-modal-backdrop"></div>
+    <div class="galerie-modal-box">
+      <button class="galerie-modal-close" id="galerie-modal-close" aria-label="Schließen">×</button>
+      <div class="galerie-modal-carousel-wrap">
+        <div id="galerie-modal-carousel" class="galerie-modal-carousel"></div>
+      </div>
+      <div id="galerie-modal-body" class="galerie-modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/ehemalige.js"></script>
+</body>
+</html>
