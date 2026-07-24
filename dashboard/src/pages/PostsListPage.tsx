@@ -37,27 +37,29 @@ export function PostsListPage() {
         <div className="list-table">
           {posts.map(post => (
             <div key={post.id} className="list-row">
-              <div className="list-row-main">
-                <span className="list-row-title">{post.titel}</span>
-                <span className="list-row-meta">
-                  {new Date(post.datum).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </span>
+              <div className="list-row-header">
+                <div className="list-row-main">
+                  <span className="list-row-title">{post.titel}</span>
+                  <span className="list-row-meta">
+                    {new Date(post.datum).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </span>
+                </div>
+                <div className="list-row-actions">
+                  <Link to={`/beitraege/${post.id}/bearbeiten`} className="btn btn-ghost btn-sm">
+                    Bearbeiten
+                  </Link>
+                  <button
+                    className="btn btn-ghost btn-sm btn-danger"
+                    onClick={() => setDeleteId(post.id)}
+                  >
+                    Löschen
+                  </button>
+                </div>
               </div>
-              <div className="list-row-actions">
-                <PublishToggle
-                  value={post.veroeffentlicht}
-                  onChange={() => handleTogglePublish(post.id, post.veroeffentlicht)}
-                />
-                <Link to={`/beitraege/${post.id}/bearbeiten`} className="btn btn-ghost btn-sm">
-                  Bearbeiten
-                </Link>
-                <button
-                  className="btn btn-ghost btn-sm btn-danger"
-                  onClick={() => setDeleteId(post.id)}
-                >
-                  Löschen
-                </button>
-              </div>
+              <PublishToggle
+                value={post.veroeffentlicht}
+                onChange={() => handleTogglePublish(post.id, post.veroeffentlicht)}
+              />
             </div>
           ))}
         </div>

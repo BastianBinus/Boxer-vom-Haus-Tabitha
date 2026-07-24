@@ -33,28 +33,30 @@ export function EhemaligeListPage() {
         <div className="list-table">
           {items.map(item => (
             <div key={item.id} className="list-row">
-              <div className="list-row-main">
-                <span className="list-row-title">{item.titel}</span>
-                <span className="list-row-meta">
-                  {new Date(item.datum).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
-                  {item.anzahl_welpen ? ` · ${item.anzahl_welpen} Welpen` : ''}
-                </span>
+              <div className="list-row-header">
+                <div className="list-row-main">
+                  <span className="list-row-title">{item.titel}</span>
+                  <span className="list-row-meta">
+                    {new Date(item.datum).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
+                    {item.anzahl_welpen ? ` · ${item.anzahl_welpen} Welpen` : ''}
+                  </span>
+                </div>
+                <div className="list-row-actions">
+                  <Link to={`/ehemalige/${item.id}/bearbeiten`} className="btn btn-ghost btn-sm">
+                    Bearbeiten
+                  </Link>
+                  <button
+                    className="btn btn-ghost btn-sm btn-danger"
+                    onClick={() => setDeleteId(item.id)}
+                  >
+                    Löschen
+                  </button>
+                </div>
               </div>
-              <div className="list-row-actions">
-                <PublishToggle
-                  value={item.veroeffentlicht}
-                  onChange={() => handleTogglePublish(item.id, item.veroeffentlicht)}
-                />
-                <Link to={`/ehemalige/${item.id}/bearbeiten`} className="btn btn-ghost btn-sm">
-                  Bearbeiten
-                </Link>
-                <button
-                  className="btn btn-ghost btn-sm btn-danger"
-                  onClick={() => setDeleteId(item.id)}
-                >
-                  Löschen
-                </button>
-              </div>
+              <PublishToggle
+                value={item.veroeffentlicht}
+                onChange={() => handleTogglePublish(item.id, item.veroeffentlicht)}
+              />
             </div>
           ))}
         </div>
