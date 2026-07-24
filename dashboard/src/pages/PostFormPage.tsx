@@ -64,7 +64,7 @@ export function PostFormPage() {
     }
   }
 
-  if (isEdit && postLoading) return <p className="page-loading">Lädt…</p>
+  if (isEdit && postLoading) return <div className="empty-state">Wird geladen…</div>
 
   return (
     <div className="page">
@@ -74,37 +74,40 @@ export function PostFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="form">
-        {error && <p className="error-text">{error}</p>}
+        <PublishToggle value={veroeffentlicht} onChange={setVeroeffentlicht} />
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="titel">Titel *</label>
-          <input
-            id="titel"
-            className="form-input"
-            type="text"
-            value={titel}
-            onChange={e => setTitel(e.target.value)}
-            required
-          />
+        {error && <div className="alert alert-error">{error}</div>}
+
+        <div className="form-grid">
+          <div className="field">
+            <label className="field-label" htmlFor="titel">Titel *</label>
+            <input
+              id="titel"
+              className="field-input"
+              type="text"
+              value={titel}
+              onChange={e => setTitel(e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="datum">Datum *</label>
+            <input
+              id="datum"
+              className="field-input"
+              type="date"
+              value={datum}
+              onChange={e => setDatum(e.target.value)}
+              required
+            />
+          </div>
         </div>
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="datum">Datum *</label>
-          <input
-            id="datum"
-            className="form-input"
-            type="date"
-            value={datum}
-            onChange={e => setDatum(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="auszug">Kurztext (optional)</label>
+        <div className="field">
+          <label className="field-label" htmlFor="auszug">Kurztext (optional)</label>
           <textarea
             id="auszug"
-            className="form-input form-textarea"
+            className="field-input field-textarea"
             rows={2}
             value={auszug}
             onChange={e => setAuszug(e.target.value)}
@@ -112,22 +115,22 @@ export function PostFormPage() {
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="inhalt">Inhalt</label>
+        <div className="field">
+          <label className="field-label" htmlFor="inhalt">Inhalt (optional)</label>
           <textarea
             id="inhalt"
-            className="form-input form-textarea"
+            className="field-input field-textarea"
             rows={6}
             value={inhalt}
             onChange={e => setInhalt(e.target.value)}
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="videoUrl">Video-URL (optional)</label>
+        <div className="field">
+          <label className="field-label" htmlFor="videoUrl">Video-URL (optional)</label>
           <input
             id="videoUrl"
-            className="form-input"
+            className="field-input"
             type="url"
             value={videoUrl}
             onChange={e => setVideoUrl(e.target.value)}
@@ -135,20 +138,16 @@ export function PostFormPage() {
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="images">Bild-URLs (optional, eine pro Zeile)</label>
+        <div className="field">
+          <label className="field-label" htmlFor="images">Bild-URLs (optional, eine pro Zeile)</label>
           <textarea
             id="images"
-            className="form-input form-textarea"
+            className="field-input field-textarea"
             rows={3}
             value={imagesText}
             onChange={e => setImagesText(e.target.value)}
-            placeholder="https://beispiel.de/bild1.jpg&#10;https://beispiel.de/bild2.jpg"
+            placeholder={'https://beispiel.de/bild1.jpg\nhttps://beispiel.de/bild2.jpg'}
           />
-        </div>
-
-        <div className="form-group">
-          <PublishToggle value={veroeffentlicht} onChange={setVeroeffentlicht} />
         </div>
 
         <div className="form-actions">
