@@ -1,0 +1,39 @@
+[
+  {
+    "id": "1",
+    "title": "Titel des Beitrags",
+    "date": "2026-07-24",
+    "excerpt": "Kurze Zusammenfassung, die in der Übersicht angezeigt wird.",
+    "body": "Langer Text des Beitrags."
+  },
+  {
+    "id": "2",
+    "title": "Beitrag mit Video",
+    "date": "2026-07-24",
+    "excerpt": "Dieser Beitrag hat ein eingebettetes YouTube-Video.",
+    "body": "Text des Beitrags.",
+    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  },
+  {
+    "id": "3",
+    "title": "Beitrag mit Fotos",
+    "date": "2026-07-24",
+    "excerpt": "Dieser Beitrag hat mehrere Fotos.",
+    "body": "Text des Beitrags.",
+    "images": [
+      "https://hemgakjhaqkrrewyzlno.supabase.co/storage/v1/object/public/hundefotos/beispiel.jpg",
+      "https://example.com/anderes-foto.jpg"
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Beitrag mit Fotos und Video",
+    "date": "2026-07-24",
+    "excerpt": "Fotos werden vor dem Video angezeigt.",
+    "body": "Text des Beitrags.",
+    "images": [
+      "https://example.com/foto.jpg"
+    ],
+    "video_url": "https://vimeo.com/123456789"
+  }
+]
